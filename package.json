@@ -1,0 +1,32 @@
+{
+  "name": "svg-dom-view",
+  "version": "1.0.0",
+  "description": ">  对SVG代码进行图形显示、DOM树展示与编辑、属性展示与编辑",
+  "main": "index.js",
+  "scripts": {
+    "dev": " chcp 65001 & ts-node ./src/crowller",
+    "dev:build": "tsc -w",
+    "dev:start": "nodemon node ./build/index.js",
+    "start": "parcel -p 1234 src/index.html",
+    "test": "tsc && node ./build/src/controller/LoginController.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CNLHB/svg-dom-view.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CNLHB/svg-dom-view/issues"
+  },
+  "homepage": "https://github.com/CNLHB/svg-dom-view#readme",
+  "devDependencies": {
+    "@types/jquery": "^3.5.4",
+    "concurrently": "^5.3.0",
+    "typescript": "^4.0.5"
+  },
+  "dependencies": {
+    "jquery": "^3.5.1"
+  }
+}
