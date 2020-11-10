@@ -5,228 +5,10 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://at.alicdn.com/t/font_2158408_s0v3j7n7n3.css">
+    <link rel="stylesheet" href="./css/index.css">
     <title>svg-dom-view</title>
 </head>
-<style>
-    html, body, ul,li {
-        padding: 0;
-        margin: 0;
-        list-style: none;
-    }
 
-    .show {
-        text-align: left;
-        height: 49%;
-        width: 49%;
-        outline: none;
-        border: 1px solid pink;
-        box-sizing: border-box;
-        margin-right: 10px;
-    }
-
-    .show-edit {
-        overflow-x: scroll;
-        white-space: nowrap;
-        padding: 20px 0px 20px 20px;
-
-    }
-
-    #graph-svg {
-        height: 100%;
-        width: 100%;
-        background-color: white;
-        border: 1px solid greenyellow;
-        /*transform-box:fill-box;*/
-        /*transform-origin:center;*/
-        /*transform:scale(2);*/
-    }
-
-    .container {
-        display: flex;
-        height: 100vh;
-        width: 100vw;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    #graph {
-        /*overflow: auto;*/
-        outline: none;
-
-    }
-
-    #graph-svg svg {
-        border: 1px solid yellow;
-    }
-
-    .form-control {
-        height: 100%;
-        width: 100%;
-        padding: 20px 0px 20px 20px;
-        font-size: 18px;
-        outline: none;
-        border: none;
-    }
-
-    #dom-show .text {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-    }
-
-    #dom-show {
-        cursor: pointer;
-    }
-
-    #dom-view {
-        position: relative;
-        padding: 20px;
-        overflow: auto;
-    }
-
-    .tree-children {
-        padding-left: 30px;
-    }
-
-    .el-notification {
-        display: flex;
-        width: 330px;
-        padding: 14px 26px 14px 13px;
-        border-radius: 8px;
-        box-sizing: border-box;
-        top: 0;
-        right: 0;
-        border: 1px solid #ebeef5;
-        position: fixed;
-        background-color: #fff;
-        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
-        transition: opacity .3s, transform .3s, left .3s, right .3s, top .4s, bottom .3s;
-        overflow: hidden;
-    }
-
-    .show-active {
-        position: relative;
-    }
-    .select-dom{
-        background-color: #89cff0;
-    }
-    .show-active:before {
-        content: " ";
-        display: block;
-        position: absolute;
-        left: 6px;
-        height: calc(100% - 25px);
-        margin-top: 21px;
-        border-left: 1px solid yellow;
-    }
-
-    .show-active .icon {
-        padding-right: 3px;
-    }
-
-    .tree-children {
-        display: none;
-    }
-
-    .show-active > .tree-children {
-        display: block;
-    }
-
-    .show-active > .hiddle {
-        display: none;
-    }
-
-    .head {
-
-    }
-
-    .props-wrap {
-
-        max-width: 45%;
-    }
-
-    .props {
-        color: #f30;
-    }
-
-    .props:before {
-        content: ' ';
-    }
-
-    .props:after {
-        content: '';
-    }
-
-    .props-value {
-        color: cornflowerblue;
-
-    }
-
-    .props-value:before {
-        content: '"';
-    }
-
-    .props-value:after {
-        content: '"';
-    }
-
-    .head:before {
-        content: "<";
-    }
-
-    .head:after {
-        content: "/>";
-    }
-
-    .double-head:before {
-        content: "<";
-    }
-
-    .double-head:after {
-        content: ">";
-    }
-
-    .show-active .foot {
-        margin-left: 13px;
-    }
-
-    .foot:before {
-        content: " </";
-    }
-
-    .foot:after {
-        content: ">";
-    }
-
-    .foot-one:before {
-        content: "</";
-    }
-
-    .foot-one:after {
-        content: ">";
-    }
-
-
-
-    #menu {
-        display: none;
-        position: fixed;
-        padding: 0;
-        background-color: #fbfef8;
-        border: 1px solid #dbdbdb;
-        z-index: 2;
-        padding-bottom: 10px;
-        cursor: pointer;
-        color:#585858;
-    }
-    #menu .menu-icon{
-        color:cornflowerblue;
-        padding-right: 5px;
-    }
-    #menu ul li{
-        padding: 10px 20px 0 10px;
-    }
-</style>
 <body>
 <div class="container">
     <div class="show show-edit"
@@ -245,45 +27,168 @@
     <div class="show show-dom" id="dom-view">
         <h1>DOM树展示区</h1>
         <menu id="menu">
-<!--            删除节点、复制节点、粘贴节点、复制SVG、粘贴属性。-->
+            <!--            删除节点、复制节点、粘贴节点、复制SVG、粘贴属性。-->
             <ul>
 
-                <li class="copy-node">
-                    <icon class="iconfont icon-copy menu-icon"></icon><span class="menu-text">复制节点</span></li>
+                <li class="copy-node" data-type="copy-node">
+                    <icon class="iconfont icon-copy menu-icon"></icon>
+                    <span class="menu-text">复制节点</span></li>
                 </li>
-                <li class="paste-node">
-                    <icon class="iconfont icon-niantie menu-icon"></icon><span class="menu-text">粘贴节点</span></li>
+                <li class="paste-node" data-type="paste-node">
+                    <icon class="iconfont icon-niantie menu-icon"></icon>
+                    <span class="menu-text">粘贴节点</span></li>
+                <div id="child-menu">
+                    <!--            删除节点、复制节点、粘贴节点、复制SVG、粘贴属性。-->
+                    <ul>
+                        <li class="paste-before" data-type="paste-before">
+                            <icon class="iconfont icon-niantie menu-icon"></icon>
+                            <span class="menu-text">节点之前</span></li>
+
+                        </li>
+                        <li class="paste-after" data-type="paste-after">
+                            <icon class="iconfont icon-niantie menu-icon"></icon>
+                            <span class="menu-text">节点之后</span></li>
+                        </li>
+                        <li class="paste-child" data-type="paste-child">
+                            <icon class="iconfont icon-niantie menu-icon"></icon>
+                            <span class="menu-text">为子节点</span></li>
+                        </li>
+                    </ul>
+                </div>
                 </li>
-                <li class="copy-svg">
-                    <icon class="iconfont icon-copy menu-icon"></icon><span class="menu-text">复制SVG</span></li>
+                <li class="copy-svg" data-type="copy-svg">
+                    <icon class="iconfont icon-copy menu-icon"></icon>
+                    <span class="menu-text">复制SVG</span></li>
                 </li>
-                <li class="remove-node">
-                    <icon class="iconfont icon-cangpeitubiao_shanchu menu-icon"></icon><span class="menu-text">删除节点</span>
+                <li class="remove-node" data-type="remove-node">
+                    <icon class="iconfont icon-cangpeitubiao_shanchu menu-icon"></icon>
+                    <span class="menu-text">删除节点</span>
                 </li>
-<!--                <li class="paste-props">粘贴属性</li>-->
+                <!--                <li class="paste-props">粘贴属性</li>-->
             </ul>
         </menu>
         <div id="dom-show">
-            <div class="show-active show-wrapper">
-                <icon class="iconfont icon-xiajiantou icon  "></icon>
-                <span class="head">div<span class="props">class</span>=<span class="props-value">value</span></span>
+            <div data-uid="svg-599" class="show-wrapper show-active">
+                <icon class="icon iconfont icon-xiajiantou"></icon>
+                <span class="double-head">svg<span class="props-wrap"><span class="props">xmlns</span>=<span
+                        class="props-value">http://www.w3.org/2000/svg</span><span class="props">version</span>=<span
+                        class="props-value">1.1</span></span>
+    </span>
                 <div class="tree-children">
-                    <icon class="iconfont icon-sanjiaoright icon"></icon>
-                    d2
-                    <p class="tree-children">11</p>
+
+                    <div data-uid="circle-6190" class="show-wrapper">
+
+    <span class="head">circle<span class="props-wrap"><span class="props">cx</span>=<span class="props-value">100</span><span
+            class="props">cy</span>=<span class="props-value">50</span><span class="props">r</span>=<span
+            class="props-value">40</span><span class="props">stroke</span>=<span class="props-value">black</span><span
+            class="props">stroke-width</span>=<span class="props-value">2</span><span class="props">fill</span>=<span
+            class="props-value">red</span></span>
+    </span>
+                        <div class="tree-children">
+
+                        </div>
+
+
+                    </div>
+
+                    <div data-uid="text-1909" class="show-wrapper">
+                        <icon class="icon iconfont icon-sanjiaoright"></icon>
+                        <span class="double-head">text<span class="props-wrap"><span class="props">x</span>=<span
+                                class="props-value">0</span><span class="props">y</span>=<span
+                                class="props-value">15</span><span class="props">fill</span>=<span class="props-value">red</span></span>
+    </span>
+                        <div class="tree-children">
+                            I love SVG
+                        </div>
+                        <span class="hiddle">...</span>
+                        <span class="foot">text</span>
+                    </div>
+
+                    <div data-uid="svg-79" class="show-wrapper">
+                        <icon class="icon iconfont icon-sanjiaoright"></icon>
+                        <span class="double-head">svg<span class="props-wrap"><span class="props">xmlns</span>=<span
+                                class="props-value">http://www.w3.org/2000/svg</span><span class="props">version</span>=<span
+                                class="props-value">1.1</span></span>
+    </span>
+                        <div class="tree-children">
+
+                            <div data-uid="polyline-2384" class="show-wrapper">
+
+    <span class="head">polyline<span class="props-wrap"><span class="props">points</span>=<span class="props-value">20,20 40,25 60,40 80,120 120,140 200,180</span><span
+            class="props">style</span>=<span class="props-value">fill:none;stroke:black;stroke-width:3</span></span>
+    </span>
+                                <div class="tree-children">
+
+                                </div>
+
+
+                            </div>
+
+                            <div data-uid="svg-4564" class="show-wrapper">
+                                <icon class="icon iconfont icon-sanjiaoright"></icon>
+                                <span class="double-head">svg<span class="props-wrap"><span
+                                        class="props">xmlns</span>=<span
+                                        class="props-value">http://www.w3.org/2000/svg</span><span
+                                        class="props">version</span>=<span class="props-value">1.1</span></span>
+    </span>
+                                <div class="tree-children">
+
+                                    <div data-uid="polyline-103" class="show-wrapper">
+
+    <span class="head">polyline<span class="props-wrap"><span class="props">points</span>=<span class="props-value">20,20 40,25 60,40 80,120 120,140 200,180</span><span
+            class="props">style</span>=<span class="props-value">fill:none;stroke:black;stroke-width:3</span></span>
+    </span>
+                                        <div class="tree-children">
+
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                                <span class="hiddle">...</span>
+                                <span class="foot">svg</span>
+                            </div>
+
+                        </div>
+                        <span class="hiddle">...</span>
+                        <span class="foot">svg</span>
+                    </div>
+
                 </div>
-                <p class="tree-children">d1</p>
-                <p class="tree-children">d1</p>
-                <span class="foot">div</span>
+                <span class="hiddle">...</span>
+                <span class="foot">svg</span>
             </div>
 
         </div>
     </div>
-    <div class="show show-attr">
+    <div class="show show-attr" id="show-attr">
         <h1>Attribute属性展示区</h1>
+        <div>
+            <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend" style="padding-bottom: 10px">
+                <div class="aiwa-input-group__prepend">props</div>
+                <input type="text" id="add-props" autocomplete="off" placeholder="请输入属性名" class="aiwa-input__inner">
+                <div class="aiwa-input-group__prepend">value</div>
+                <input type="text" id="add-value" autocomplete="off" placeholder="请输入属性值" class="aiwa-input__inner">
+            </div>
+            <button type="button" id="add-btn" class="aiwa-button aiwa-button--primary"><span>增加属性</span></button>
+        </div>
+
+        <div id="attr-wrap">
+
+        </div>
+
     </div>
 </div>
-
+<!--<div  class="aiwa-message-box__wrapper"-->
+<!--     style="z-index: 2012;">-->
+<!--    <div class="aiwa-message-box">-->
+<!--        <div class="aiwa-input aiwa-input-group aiwa-input-group&#45;&#45;prepend">-->
+<!--            <div class="aiwa-input-group__prepend">name</div>-->
+<!--            <input type="text" autocomplete="off" placeholder="请输入内容" class="aiwa-input__inner">-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
 <script src="./index.ts"></script>
 </body>
 </html>

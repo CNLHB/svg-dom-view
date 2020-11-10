@@ -2,7 +2,7 @@ import SvgUtils from './utils/createSVG'
 import $ from 'jquery'
 import validateXML from "./utils/checkXML";
 import SvgInfo from "./utils/svgInfo";
-
+import {getProps, SVG_TAG, checkInter} from './config'
 let svgType: string[] = ["svg", "g", "path", "text", "line", "rect", "ellipse", "circle", "polyline", "polygon"]
 let doubleTag: string[] = ["svg", "g", "text"]
 $("#dom-view").on("click", '.icon', function (event) {
@@ -27,7 +27,43 @@ $("#dom-view").on("click", '.show-wrapper', function (event) {
         prev.classList.toggle("select-dom")
     }
     target.classList.toggle("select-dom")
-    //graph
+    let uid: string = target.getAttribute("data-uid")
+    $("#add-btn").attr("data-uid", uid)
+    let selMark = $("#" + uid)
+
+    if (selMark[0]) {
+        let propsArr = selMark.get(0).getAttributeNames()
+        let tag = selMark.get(0).tagName
+        //固定属性加特有属性
+        let tagArr = Array.from(new Set(getProps(tag as SVG_TAG).concat(propsArr)))
+        let attrHtml = ''
+        tagArr.forEach((item: string) => {
+            if (item.trim() !== '') {
+                let value = selMark.attr(item) ? selMark.attr(item) : ""
+                let placeholder = selMark.attr(item) ? "请输入内容" : "未指定"
+                let inputId = uid + "_" + item
+                attrHtml += `
+                    <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend">
+                        <div class="aiwa-input-group__prepend">${item}</div>
+                        <input type="text" ${item == "id" ? "disabled" : ""} value='${value}' data-uid=${uid} id=${inputId} autocomplete="off"
+                         placeholder=${placeholder} class="aiwa-input__inner">
+                    </div>
+                `
+            }
+
+        })
+        $("#attr-wrap").html(attrHtml)
+        let currentRect = selMark[0].getBoundingClientRect()
+        let percentRect = $("#graph-svg")[0].getBoundingClientRect()
+        $("#rect-tip").attr({
+            x: currentRect.x - percentRect.x,
+            y: currentRect.y - percentRect.y,
+            width: currentRect.width,
+            height: currentRect.height
+        })
+        $("#rect-tip").css("display", "block");
+    }
+
     prev = target
     if (prev.classList.contains("select-dom")) {
         selectDomFlag = true
@@ -41,6 +77,101 @@ $("#dom-view").on("click", '.show-wrapper', function (event) {
         })
     }
 })
+$("#add-btn").on('click', function (event) {
+    console.log()
+    let uid = $(this).attr("data-uid")
+    let props = $("#add-props").val() as string
+    let propsValue = $("#add-value").val() as string
+    if (!props || !propsValue) {
+        singleTip("属性名或属性值为空")
+        return
+    }
+    let domGraph = $("#" + uid)
+    let tag = domGraph.get(0).tagName
+    let propsArr = domGraph.get(0).getAttributeNames()
+    let tagArr = Array.from(new Set(getProps(tag as SVG_TAG).concat(propsArr)))
+    if (tagArr.indexOf(props) !== -1) {
+        singleTip("属性名不能重复")
+        return
+    }
+    domGraph.attr(props, propsValue)
+    let domView = $("#dom-" + uid)
+    let propsWrap = domView.children(".head-wrap")
+        .children(".props-wrap")
+    let nameProps = propsWrap.children(".wrap-" + props)
+    if (propsValue == '' && nameProps.length !== 0) {
+        return nameProps.remove()
+    }
+    if (nameProps.length === 0) {
+        propsWrap.append(`<span class="wrap-${props}"><span class="props name-${props}">${props}</span>=<span class="props-value">${propsValue}</span></span>`)
+    } else {
+        nameProps.children(".name-" + props).next().text(propsValue)
+    }
+    let inputId = uid + "_" + props
+    let attrHtml = `
+                    <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend">
+                        <div class="aiwa-input-group__prepend">${props}</div>
+                        <input type="text"  value='${propsValue}' data-uid=${uid} id=${inputId} autocomplete="off"
+                         placeholder='请输入内容' class="aiwa-input__inner">
+                        <div class="delete-attr delete-btn" data-uid=${inputId}>删除</div>
+                    </div>
+                `
+    $("#attr-wrap").append(attrHtml)
+
+})
+$("#attr-wrap").on("click", ".delete-btn", function (event) {
+    let $target = $(event.target)
+    let uid = $target.attr("data-uid")
+    if (uid != null) {
+        let id_attrName = uid.split("_")
+        let id = id_attrName[0]
+        let attrName = id_attrName[1]
+        let domGraph = $("#" + id)
+        domGraph.removeAttr(attrName)
+        let domView = $("#dom-" + id)
+        let propsWrap = domView.children(".head-wrap")
+            .children(".props-wrap")
+        let nameProps = propsWrap.children(".wrap-" + attrName)
+        if (nameProps.length !== 0) {
+            nameProps.remove()
+        }
+    }
+    $target.parent().remove()
+})
+
+
+$("#attr-wrap").on("input", "input", function (event) {
+    let target = $(event.target)
+    let id = target.attr('id')
+    let propsValue: string = target.val() as string
+    if (id != null) {
+        let uid = id.split('_')
+        if (uid[1] && !checkInter(uid[1], propsValue)) {
+            singleTip("请输入有效的数值")
+            return
+        }
+        let domGraph = $("#" + uid[0])
+        console.log(domGraph)
+        if (target.val()) {
+            domGraph.attr(uid[1], propsValue)
+        } else {
+            domGraph.removeAttr(uid[1])
+        }
+        let domView = $("#dom-" + uid[0])
+        let propsWrap = domView.children(".head-wrap")
+            .children(".props-wrap")
+        let nameProps = propsWrap.children(".wrap-" + uid[1])
+        if (propsValue == '' && nameProps.length !== 0) {
+            return nameProps.remove()
+        }
+        if (nameProps.length === 0) {
+            propsWrap.append(`<span class="wrap-${uid[1]}"><span class="props name-${uid[1]}">${uid[1]}</span>=<span class="props-value">${propsValue}</span></span>`)
+        } else {
+            nameProps.children(".name-" + uid[1]).next().text(propsValue)
+        }
+    }
+})
+
 $("#dom-view").on('click', function () {
     if (prev != null) {
         prev.classList.remove("select-dom")
@@ -51,15 +182,16 @@ $("#dom-view").on('click', function () {
         oMenu.css({
             display: "none"
         })
-        selectDom = null
     }
-
+    $("#rect-tip").css("display", "none");
+    selectDom = null
 })
 let selectDom: any = null;
 $("#dom-show").on('contextmenu ', '.show-wrapper', function (event) {
     event.preventDefault();
+    event.stopPropagation();
     if (!selectDomFlag) return
-    selectDom = $(event.target)
+    selectDom = $(event.currentTarget)
     let _x = event.clientX,
         _y = event.clientY;
     let oMenu = $("#menu")
@@ -75,8 +207,20 @@ let copyNode: any;
 $("#menu").on('click', "li", function (event) {
     event.stopPropagation();
     let target = $(event.currentTarget);
-    let type = target.attr("class")
+    let type = target.attr("data-type")
     let oMenu = $("#menu")
+    let cloneSvg:any;
+    let selectSvg:any;
+    if(type !== "paste-node"&&type?.startsWith("paste")){
+        let copyUId = selectDom.attr("data-uid")
+        let id = copyUId + Math.ceil(Math.random()*1000)
+        selectSvg = $("#" + copyUId)
+        cloneSvg = selectSvg.clone(true);
+        cloneSvg.attr("id", id)
+        copyNode.attr("data-uid", id)
+        // copyNode.attr("id",id)
+        copyNode.removeClass("select-dom")
+    }
     switch (type) {
         case "remove-node":
             selectDom.remove()
@@ -89,26 +233,58 @@ $("#menu").on('click', "li", function (event) {
             oMenu.css({
                 display: "none"
             })
+            let uid = selectDom.attr("data-uid")
+            if (uid) {
+                let tag = uid.split("-")[0]
+                if (tag == "svg" || selectDom[0].tagName == "g") {
+                    singleTip("所选内容不是节点")
+                    return copyNode = null
+                }
+            }
             copyNode = selectDom.clone(true);
             singleTip("复制节点成功")
             break;
         case "paste-node":
-            if (copyNode) {
-                let id = copyNode.attr("id") + "1"
-                copyNode.attr("id", id)
-                copyNode.removeClass("select-dom")
-                selectDom.after(copyNode)
-            }
-            oMenu.css({
-                display: "none"
-            })
-            singleTip("粘贴节点成功")
+            if (!copyNode) return singleTip("没有复制内容")
+            $("#child-menu").css("display", "block");
+
             break;
         case "copy-svg":
             oMenu.css({
                 display: "none"
             })
             singleTip("复制SVG成功")
+            break;
+        case "paste-after":
+            selectSvg.after(cloneSvg)
+            selectDom.after(copyNode)
+            $("#child-menu").css("display", "none");
+            oMenu.css({
+                display: "none"
+            })
+            singleTip("粘贴节点成功")
+            break;
+        case "paste-before":
+            //之前
+            selectSvg.before(cloneSvg)
+            selectDom.before(copyNode)
+            singleTip("粘贴节点成功")
+            $("#child-menu").css("display", "none");
+            oMenu.css({
+                display: "none"
+            })
+            break;
+        case "paste-child":
+            $("#child-menu").css("display", "none");
+            oMenu.css({
+                display: "none"
+            })
+            let tag = selectSvg.get(0).tagName;
+
+            console.log(selectSvg);
+            // selectSvg.append(cloneSvg)
+            // selectDom.append(copyNode)
+            singleTip("粘贴节点成功")
             break;
     }
     console.log(type)
@@ -135,14 +311,6 @@ if (graph !== null) {
 if (edit !== null) {
     edit.addEventListener('input', keyupChangeHandler)
 }
-let editT: string = `
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-   <circle cx="100" cy="50" r="40" stroke="black" stroke-width="2" fill="red" />
-</svg> 
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-   <circle cx="50" cy="50" r="40" stroke="black" stroke-width="2" fill="red" />
-</svg> 
-`
 
 function keyupChangeHandler(event: Event) {
     if (event.target) {
@@ -153,7 +321,7 @@ function keyupChangeHandler(event: Event) {
     let svgArrTag = editText.match(matchSvg) == null ? [] : editText.match(matchSvg)
     let tagNameArr = editText.match(checkSvgTag)
     // console.log(tagNameArr)
-    console.log(svgArrTag)
+    // console.log(svgArrTag)
     let showDom = $("#dom-show")
     tagNameArr?.forEach((item: string) => {
         if (svgType.indexOf(item) == -1) {
@@ -198,8 +366,16 @@ function keyupChangeHandler(event: Event) {
     let nodes: any = null
     nodes = fragment.firstElementChild
     let vdom = deepKeyValue(nodes)
-    $(svgInfo.svg).append(fragment)
-
+    $(svgInfo.svg).html(fragment)
+    let rectTips = SvgUtils.createSVG(
+        'rect',
+        {
+            x: 0, y: 0, width: 0, height: 0, stroke: '#89cff0',
+            opacity: "0.5",
+            id: 'rect-tip',
+            'stroke-width': 2, fill: '#89cff0'
+        });
+    $("#graph-svg").append(rectTips)
     showDom.html(createElementByVdom(vdom))
     // edit&&(edit.innerHTML = editHtml)
 
@@ -221,15 +397,15 @@ function createElementByVdom(vdom: IVDomNode) {
     let str = '';
     // @ts-ignore
     Object.entries(vdom.props).forEach((item) => {
-        if (item[0] !== "id" && item[0].trim()) {
-            str += `<span class="props">${item[0]}</span>=<span class="props-value">${item[1]}</span>`
+        if (item[0] !== "data-uid" && item[0].trim()) {
+            str += `<span class="wrap-${item[0]}"><span class="props name-${item[0]}">${item[0]}</span>=<span class="props-value">${item[1]}</span></span>`
         }
     })
     let isShriColumn = false;
     var dom = `
-    <div  id=${vdom.props.id} class="show-wrapper">
+    <div  data-uid=${vdom.props['data-uid']} id=${"dom-" + vdom.props['data-uid']} class="show-wrapper">
     ${len === 0 ? "" : '<icon  class="icon iconfont icon-sanjiaoright"></icon>'}
-    <span class=${isDobuleTag ? "double-head" : "head"}>${vdom.tag}<span class="props-wrap">${str}</span>
+    <span class='${isDobuleTag ? "double-head" : "head"} head-wrap'>${vdom.tag}<span class="props-wrap">${str}</span>
     </span>
         <div class="tree-children">
          ${isText == true ? vdom.children :
@@ -276,12 +452,14 @@ function deepKeyValue(nodes: any) {
     }
 
     props.forEach((item: string) => {
-        obj.props[item] = nodes.getAttribute(item).trim()
+        if (item.trim() !== '') {
+            obj.props[item] = nodes.getAttribute(item).trim()
+        }
     })
     if (props.indexOf("id") == -1) {
         let id = tag + "-" + parseInt((Math.random() * 10000).toString()).toString()
         nodes.setAttribute("id", id)
-        obj.props["id"] = id
+        obj.props["data-uid"] = id
     }
     if (nodes.childNodes.length == 0) return obj
     let child = nodes.childNodes

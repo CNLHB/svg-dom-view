@@ -2,7 +2,6 @@ import $ from 'jquery'
 import MouseMoveEvent = JQuery.MouseMoveEvent;
 
 
-
 export default class SvgInfo {
     // public svg: SVGElement = document.querySelector('#graph') as SVGElement;
     public svg: SVGElement = document.querySelector('#graph-svg') as SVGElement;
@@ -24,9 +23,9 @@ export default class SvgInfo {
         this.widthScale = this.clientWidth / width;
         this.heightScale = this.clientHeight / heigth;
         // @ts-ignore
-        this.offsetLeft = $(this.svg).offset().left;
+        this.offsetLeft = $('#graph-svg') && $('#graph-svg').offset().left;
         // @ts-ignore
-        this.offsetTop = $(this.svg).offset().top;
+        this.offsetTop = $('#graph-svg') && $('#graph-svg').offset().top;
 
         this.bindMousewheel()
         this.bindMouseup()
