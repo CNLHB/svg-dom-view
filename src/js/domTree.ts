@@ -3,10 +3,22 @@ import $ from 'jquery'
 import {getProps, SVG_TAG} from "../config";
 import {svgInfo} from "../index";
 import ContextMenuEvent = JQuery.ContextMenuEvent;
+import {createPropsAndValue} from "../utils/utils";
 
 class DomTree {
+    /**
+     * 上一个选择的标签
+     * @private prev
+     */
     private prev: any;
+    /**
+     * 判断DOM区域是否选择dom
+     */
     private selectDomFlag: boolean = false
+    /**
+     * 当前选择的标签
+     * @private selectDom
+     */
     private selectDom: any = null;
 
     constructor(private domView: any) {
@@ -32,6 +44,7 @@ class DomTree {
     getSelectDom(): any {
         return this.selectDom
     }
+
 
     setSelectDomFlag(selectDomFlag: boolean): void {
         this.selectDomFlag = selectDomFlag
@@ -110,39 +123,45 @@ class DomTree {
             this.prev.toggleClass("select-dom")
         }
         target.toggleClass("select-dom")
+
         let uid: string = target.attr("data-uid") as string
+
+
         $("#add-btn").attr("data-uid", uid)
+        $("#add-btn").addClass("text-node")
         let selMark = $("#" + uid)
         if (selMark[0]) {
             let propsArr = selMark.get(0).getAttributeNames()
             let tag: string = selMark.get(0).tagName
+            let tagArr: string[] = [];
+            if (target.hasClass("text-node")) {
+                tagArr = ["content"]
+
+            } else {
+                tagArr = Array.from(new Set(getProps(tag as SVG_TAG).concat(propsArr)))
+            }
             //固定属性加特有属性
-            let tagArr: string[] = Array.from(new Set(getProps(tag as SVG_TAG).concat(propsArr)))
+
             let attrHtml = ''
             tagArr.forEach((item: string) => {
                 if (item.trim() !== '') {
-                    let value = selMark.attr(item) ? selMark.attr(item) : ""
+                    let value = selMark.attr(item) != null ? selMark.attr(item) : ""
+                    value = value == undefined ? "" : value
+                    value = item == "content" ? target.text() : value
                     let placeholder = selMark.attr(item) ? "请输入内容" : "未指定"
                     let inputId = uid + "_" + item
-                    attrHtml += `
-                    <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend">
-                        <div class="aiwa-input-group__prepend">${item}</div>
-                        <input type="text" ${item == "id" ? "disabled" : ""} value='${value}' data-uid=${uid} id=${inputId} autocomplete="off"
-                         placeholder=${placeholder} class="aiwa-input__inner">
-                    </div>
-                `
+                    attrHtml += createPropsAndValue(item, value, uid, inputId, placeholder)
                 }
 
             })
             $("#attr-wrap").html(attrHtml)
             let currentRect = selMark[0].getBoundingClientRect()
-            console.log(selMark[0])
             let percentRect = $("#graph-svg")[0].getBoundingClientRect()
             let x: number = 0
             let y: number = 0
             let setX: number = 0
             let setY: number = 0
-            let scale = Math.ceil(((svgInfo.getScale() - 1) * 1000)) / 1000
+            let scale = Math.ceil(((svgInfo.getScale() - 1) * 100000)) / 100000
             let offsetX = currentRect.x - percentRect.x
             let offsetY = currentRect.y - percentRect.y
             //放大

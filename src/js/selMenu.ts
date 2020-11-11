@@ -55,7 +55,7 @@ class SelMenu {
                 singleTip("复制节点成功")
                 break;
             case "paste-node":
-                if (!this.copyNode) return singleTip("没有复制内容","error")
+                if (!this.copyNode)return singleTip("没有复制内容","error")
                 $("#child-menu").css("display", "block");
 
                 break;

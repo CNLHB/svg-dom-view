@@ -22,7 +22,7 @@ export function createSingleTips() {
     let instance: HTMLDivElement;
     let clear: number | null;
     return function (text: string, type?: TipType) {
-        let color: string = ''
+        let color: string = "#409eff"
         switch (type) {
             case undefined:
                 color = "#409eff"
@@ -58,7 +58,7 @@ export function createSingleTips() {
 					<div class="el-notification__group">
 						<h2 class="el-notification__title">提示</h2>
 						<div class="el-notification__content">
-							<p>${text}</p></div>
+							<p style="color:${color};">${text}</p></div>
 						<div class="el-notification__closeBtn el-icon-close"></div>
 					</div>
 				</div>
@@ -70,20 +70,20 @@ export function createSingleTips() {
             instance && (instance.style.display = 'none')
             clear && clearTimeout(clear)
             clear = null
-        }, 5000)
+        }, 2000)
 
     }
 
 }
+
 /**
  *
  * @param vdom
- * return dom
+ * return domStr
  */
 export function createElementByVdom(vdom: IVDomNode) {
-    let isText = typeof vdom.children === 'string'
-    let len = vdom.children.length;
-    let child;
+    let isText: boolean = typeof vdom.children === 'string'
+    let len: number = vdom.children.length;
     if (isText && len == 0) {
         return ''
     }
@@ -101,10 +101,10 @@ export function createElementByVdom(vdom: IVDomNode) {
     ${len === 0 ? "" : '<icon  class="icon iconfont icon-sanjiaoright"></icon>'}
     <span class='${isDobuleTag ? "double-head" : "head"} head-wrap'>${vdom.tag}<span class="props-wrap">${str}</span>
     </span>
-        <div class="tree-children">
-         ${isText == true ? vdom.children :
-        (Array.isArray(vdom.children) ? createElemTextByVdom(vdom.children) : '')}
-         </div>
+     ${isText == true ? `<div data-uid=${vdom.props['data-uid']} class="text-node show-wrapper tree-children">${vdom.children}</div>` :
+        (len > 0 ? `<div class="tree-children">${createElemTextByVdom(vdom.children as [])}</div>` : '')
+    }
+
     ${len == 0 ? "" : '<span class="hiddle">...</span>'}
    ${isDobuleTag ? `<span class=${len == 0 ? "foot-one" : "foot"}>${vdom.tag}</span>` : ''}
     </div>
@@ -121,6 +121,16 @@ export function createElemTextByVdom(vdom: IVDomNode[]) {
     return strDom
 }
 
+export function createPropsAndValue(item: string, value: string, uid: string, inputId: string, placeholder: string = "请输入内容"): string {
+    let attrHtml = `
+                    <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend">
+                        <div class="aiwa-input-group__prepend">${item}</div>
+                        <input type="text" ${item == "id" ? "disabled" : ""} value='${value}' data-uid=${uid} id=${inputId} autocomplete="off"
+                         placeholder=${placeholder} class="aiwa-input__inner">
+                    </div>
+                `
+    return attrHtml
+}
 
 export interface IProps {
     [key: string]: string

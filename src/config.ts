@@ -2,16 +2,6 @@ let fixedProps: string[] = ["id", "class", "style", "transform", "stroke", "stro
 
 interface IPropsStrate {
     [key: string]: string[]
-
-    // textProps: string[]
-    // pathProps: string[]
-    // lineProps: string[]
-    // rectProps: string[]
-    // circleProps: string[]
-    // ellipseProps: string[]
-    // polylineProps: string[]
-    // polygonProps: string[]
-    // gProps: string[]
 }
 
 let propsStrate: IPropsStrate = {
@@ -24,10 +14,11 @@ let propsStrate: IPropsStrate = {
     ellipse: ["cx", "cy", "rx", "ry"],
     polyline: ["points"],
     polygon: ["points"],
-    g: ["x", "y", "width", "height", "viewBox"]
+    g: ["x", "y", "width", "height", "viewBox"],
+    "text-node": ["content"]
 }
 
-export type SVG_TAG = "svg" | "text" | "path" | "line" | "rect" | "circle" | "ellipse" | "polyline" | "polygon" | "g"
+export type SVG_TAG = "svg" | "text" | "text-node"| "path" | "line" | "rect" | "circle" | "ellipse" | "polyline" | "polygon" | "g"
 export const toCheckProps: string[] = ["stroke-width","x","y","height","cx","cy","rx","ry","width","x1","x2","y2","y1","font-size"]
 
 export function getProps(tag: SVG_TAG): string[] {

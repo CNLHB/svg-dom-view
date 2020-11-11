@@ -11429,7 +11429,7 @@ exports.default = SvgInfo;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.deepKeyValue = exports.createElemTextByVdom = exports.createElementByVdom = exports.createSingleTips = exports.svgType = exports.doubleTag = void 0;
+exports.deepKeyValue = exports.createPropsAndValue = exports.createElemTextByVdom = exports.createElementByVdom = exports.createSingleTips = exports.svgType = exports.doubleTag = void 0;
 exports.doubleTag = ["svg", "g", "text"];
 exports.svgType = ["svg", "g", "path", "text", "line", "rect", "ellipse", "circle", "polyline", "polygon"];
 
@@ -11450,7 +11450,7 @@ function createSingleTips() {
   var instance;
   var clear;
   return function (text, type) {
-    var color = '';
+    var color = "#409eff";
 
     switch (type) {
       case undefined:
@@ -11477,7 +11477,7 @@ function createSingleTips() {
     } else {
       instance = document.createElement("div");
       instance.id = "tips";
-      instance.innerHTML = "\n                <div role=\"alert\" class=\"el-notification right\" style=\"top: 16px; z-index: 2027;\">\n\t\t\t\t\t<div class=\"el-notification__group\">\n\t\t\t\t\t\t<h2 class=\"el-notification__title\">\u63D0\u793A</h2>\n\t\t\t\t\t\t<div class=\"el-notification__content\">\n\t\t\t\t\t\t\t<p>" + text + "</p></div>\n\t\t\t\t\t\t<div class=\"el-notification__closeBtn el-icon-close\"></div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n                ";
+      instance.innerHTML = "\n                <div role=\"alert\" class=\"el-notification right\" style=\"top: 16px; z-index: 2027;\">\n\t\t\t\t\t<div class=\"el-notification__group\">\n\t\t\t\t\t\t<h2 class=\"el-notification__title\">\u63D0\u793A</h2>\n\t\t\t\t\t\t<div class=\"el-notification__content\">\n\t\t\t\t\t\t\t<p style=\"color:" + color + ";\">" + text + "</p></div>\n\t\t\t\t\t\t<div class=\"el-notification__closeBtn el-icon-close\"></div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n                ";
       instance.style.display = 'block';
       document.body.appendChild(instance);
     }
@@ -11486,7 +11486,7 @@ function createSingleTips() {
       instance && (instance.style.display = 'none');
       clear && clearTimeout(clear);
       clear = null;
-    }, 5000);
+    }, 2000);
   };
 }
 
@@ -11494,13 +11494,12 @@ exports.createSingleTips = createSingleTips;
 /**
  *
  * @param vdom
- * return dom
+ * return domStr
  */
 
 function createElementByVdom(vdom) {
   var isText = typeof vdom.children === 'string';
   var len = vdom.children.length;
-  var child;
 
   if (isText && len == 0) {
     return '';
@@ -11515,7 +11514,7 @@ function createElementByVdom(vdom) {
     }
   });
   var isShriColumn = false;
-  var dom = "\n    <div  data-uid=" + vdom.props['data-uid'] + " id=" + ("dom-" + vdom.props['data-uid']) + " class=\"show-wrapper\">\n    " + (len === 0 ? "" : '<icon  class="icon iconfont icon-sanjiaoright"></icon>') + "\n    <span class='" + (isDobuleTag ? "double-head" : "head") + " head-wrap'>" + vdom.tag + "<span class=\"props-wrap\">" + str + "</span>\n    </span>\n        <div class=\"tree-children\">\n         " + (isText == true ? vdom.children : Array.isArray(vdom.children) ? createElemTextByVdom(vdom.children) : '') + "\n         </div>\n    " + (len == 0 ? "" : '<span class="hiddle">...</span>') + "\n   " + (isDobuleTag ? "<span class=" + (len == 0 ? "foot-one" : "foot") + ">" + vdom.tag + "</span>" : '') + "\n    </div>\n    ";
+  var dom = "\n    <div  data-uid=" + vdom.props['data-uid'] + " id=" + ("dom-" + vdom.props['data-uid']) + " class=\"show-wrapper\">\n    " + (len === 0 ? "" : '<icon  class="icon iconfont icon-sanjiaoright"></icon>') + "\n    <span class='" + (isDobuleTag ? "double-head" : "head") + " head-wrap'>" + vdom.tag + "<span class=\"props-wrap\">" + str + "</span>\n    </span>\n     " + (isText == true ? "<div data-uid=" + vdom.props['data-uid'] + " class=\"text-node show-wrapper tree-children\">" + vdom.children + "</div>" : len > 0 ? "<div class=\"tree-children\">" + createElemTextByVdom(vdom.children) + "</div>" : '') + "\n\n    " + (len == 0 ? "" : '<span class="hiddle">...</span>') + "\n   " + (isDobuleTag ? "<span class=" + (len == 0 ? "foot-one" : "foot") + ">" + vdom.tag + "</span>" : '') + "\n    </div>\n    ";
   return dom;
 }
 
@@ -11530,6 +11529,17 @@ function createElemTextByVdom(vdom) {
 }
 
 exports.createElemTextByVdom = createElemTextByVdom;
+
+function createPropsAndValue(item, value, uid, inputId, placeholder) {
+  if (placeholder === void 0) {
+    placeholder = "请输入内容";
+  }
+
+  var attrHtml = "\n                    <div class=\"aiwa-input aiwa-input-group aiwa-input-group--prepend\">\n                        <div class=\"aiwa-input-group__prepend\">" + item + "</div>\n                        <input type=\"text\" " + (item == "id" ? "disabled" : "") + " value='" + value + "' data-uid=" + uid + " id=" + inputId + " autocomplete=\"off\"\n                         placeholder=" + placeholder + " class=\"aiwa-input__inner\">\n                    </div>\n                ";
+  return attrHtml;
+}
+
+exports.createPropsAndValue = createPropsAndValue;
 
 function deepKeyValue(nodes) {
   var obj = {
@@ -11793,7 +11803,8 @@ var propsStrate = {
   ellipse: ["cx", "cy", "rx", "ry"],
   polyline: ["points"],
   polygon: ["points"],
-  g: ["x", "y", "width", "height", "viewBox"]
+  g: ["x", "y", "width", "height", "viewBox"],
+  "text-node": ["content"]
 };
 exports.toCheckProps = ["stroke-width", "x", "y", "height", "cx", "cy", "rx", "ry", "width", "x1", "x2", "y2", "y1", "font-size"];
 
@@ -11847,6 +11858,8 @@ var config_1 = require("../config");
 
 var index_1 = require("../index");
 
+var utils_1 = require("../utils/utils");
+
 var DomTree =
 /** @class */
 function () {
@@ -11854,7 +11867,16 @@ function () {
     var _this = this;
 
     this.domView = domView;
+    /**
+     * 判断DOM区域是否选择dom
+     */
+
     this.selectDomFlag = false;
+    /**
+     * 当前选择的标签
+     * @private selectDom
+     */
+
     this.selectDom = null;
 
     this.domViewContextmenuHandler = function (event) {
@@ -11924,31 +11946,40 @@ function () {
       target.toggleClass("select-dom");
       var uid = target.attr("data-uid");
       jquery_1.default("#add-btn").attr("data-uid", uid);
+      jquery_1.default("#add-btn").addClass("text-node");
       var selMark = jquery_1.default("#" + uid);
 
       if (selMark[0]) {
         var propsArr = selMark.get(0).getAttributeNames();
-        var tag = selMark.get(0).tagName; //固定属性加特有属性
+        var tag = selMark.get(0).tagName;
+        var tagArr = [];
 
-        var tagArr = Array.from(new Set(config_1.getProps(tag).concat(propsArr)));
+        if (target.hasClass("text-node")) {
+          tagArr = ["content"];
+        } else {
+          tagArr = Array.from(new Set(config_1.getProps(tag).concat(propsArr)));
+        } //固定属性加特有属性
+
+
         var attrHtml_1 = '';
         tagArr.forEach(function (item) {
           if (item.trim() !== '') {
-            var value = selMark.attr(item) ? selMark.attr(item) : "";
+            var value = selMark.attr(item) != null ? selMark.attr(item) : "";
+            value = value == undefined ? "" : value;
+            value = item == "content" ? target.text() : value;
             var placeholder = selMark.attr(item) ? "请输入内容" : "未指定";
             var inputId = uid + "_" + item;
-            attrHtml_1 += "\n                    <div class=\"aiwa-input aiwa-input-group aiwa-input-group--prepend\">\n                        <div class=\"aiwa-input-group__prepend\">" + item + "</div>\n                        <input type=\"text\" " + (item == "id" ? "disabled" : "") + " value='" + value + "' data-uid=" + uid + " id=" + inputId + " autocomplete=\"off\"\n                         placeholder=" + placeholder + " class=\"aiwa-input__inner\">\n                    </div>\n                ";
+            attrHtml_1 += utils_1.createPropsAndValue(item, value, uid, inputId, placeholder);
           }
         });
         jquery_1.default("#attr-wrap").html(attrHtml_1);
         var currentRect = selMark[0].getBoundingClientRect();
-        console.log(selMark[0]);
         var percentRect = jquery_1.default("#graph-svg")[0].getBoundingClientRect();
         var x = 0;
         var y = 0;
         var setX = 0;
         var setY = 0;
-        var scale = Math.ceil((index_1.svgInfo.getScale() - 1) * 1000) / 1000;
+        var scale = Math.ceil((index_1.svgInfo.getScale() - 1) * 100000) / 100000;
         var offsetX = currentRect.x - percentRect.x;
         var offsetY = currentRect.y - percentRect.y; //放大
 
@@ -12044,7 +12075,7 @@ function () {
 }();
 
 exports.default = DomTree;
-},{"jquery":"../node_modules/jquery/dist/jquery.js","../config":"config.ts","../index":"index.ts"}],"js/selMenu.ts":[function(require,module,exports) {
+},{"jquery":"../node_modules/jquery/dist/jquery.js","../config":"config.ts","../index":"index.ts","../utils/utils":"utils/utils.ts"}],"js/selMenu.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -12183,7 +12214,212 @@ function () {
 }();
 
 exports.default = SelMenu;
-},{"jquery":"../node_modules/jquery/dist/jquery.js","./singleTip":"js/singleTip.ts","../utils/utils":"utils/utils.ts","../index":"index.ts"}],"index.ts":[function(require,module,exports) {
+},{"jquery":"../node_modules/jquery/dist/jquery.js","./singleTip":"js/singleTip.ts","../utils/utils":"utils/utils.ts","../index":"index.ts"}],"js/attrArea.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var jquery_1 = __importDefault(require("jquery"));
+
+var config_1 = require("../config");
+
+var singleTip_1 = require("./singleTip");
+/**
+ * 属性区域
+ */
+
+
+var AtrrArea =
+/** @class */
+function () {
+  function AtrrArea(atrrArea) {
+    this.atrrArea = atrrArea;
+
+    this.inputChangeHandler = function (event) {
+      var target = jquery_1.default(event.target);
+      var id = target.attr('id');
+      var propsValue = target.val();
+
+      if (id != null) {
+        var uid = id.split('_');
+
+        if (uid[1] && !config_1.checkInter(uid[1], propsValue)) {
+          singleTip_1.singleTip("请输入有效的数值");
+          return;
+        }
+
+        if (uid[1] == "content") {
+          console.log("文本");
+          jquery_1.default("#dom-" + uid[0]).children(".text-node").text(propsValue);
+          jquery_1.default("#" + uid[0]).html(propsValue);
+          return;
+        }
+
+        var domGraph = jquery_1.default("#" + uid[0]); // console.log(domGraph)
+
+        if (target.val()) {
+          domGraph.attr(uid[1], propsValue);
+        } else {
+          domGraph.removeAttr(uid[1]);
+        }
+
+        var domView = jquery_1.default("#dom-" + uid[0]);
+        var propsWrap = domView.children(".head-wrap").children(".props-wrap");
+        var nameProps = propsWrap.children(".wrap-" + uid[1]);
+
+        if (propsValue == '' && nameProps.length !== 0) {
+          return nameProps.remove();
+        }
+
+        if (nameProps.length === 0) {
+          propsWrap.append("<span class=\"wrap-" + uid[1] + "\"><span class=\"props name-" + uid[1] + "\">" + uid[1] + "</span>=<span class=\"props-value\">" + propsValue + "</span></span>");
+        } else {
+          nameProps.children(".name-" + uid[1]).next().text(propsValue);
+        }
+      }
+    };
+
+    this.deleteBtnClickHandler = function (event) {
+      var $target = jquery_1.default(event.target);
+      var uid = $target.attr("data-uid");
+
+      if (uid != null) {
+        var id_attrName = uid.split("_");
+        var id = id_attrName[0];
+        var attrName = id_attrName[1];
+        var domGraph = jquery_1.default("#" + id);
+        domGraph.removeAttr(attrName);
+        var domView = jquery_1.default("#dom-" + id);
+        var propsWrap = domView.children(".head-wrap").children(".props-wrap");
+        var nameProps = propsWrap.children(".wrap-" + attrName);
+
+        if (nameProps.length !== 0) {
+          nameProps.remove();
+        }
+      }
+
+      $target.parent().remove();
+    };
+
+    this.atrrArea = atrrArea;
+    this.bindDeleteBtnClick();
+    this.bindInputChange();
+  }
+
+  AtrrArea.prototype.bindDeleteBtnClick = function () {
+    this.atrrArea.on('click', '.delete-btn', this.deleteBtnClickHandler);
+  };
+
+  AtrrArea.prototype.bindInputChange = function () {
+    this.atrrArea.on('input', 'input', this.inputChangeHandler);
+  };
+
+  return AtrrArea;
+}();
+
+exports.default = AtrrArea;
+},{"jquery":"../node_modules/jquery/dist/jquery.js","../config":"config.ts","./singleTip":"js/singleTip.ts"}],"js/addBtn.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var jquery_1 = __importDefault(require("jquery"));
+
+var singleTip_1 = require("./singleTip");
+
+var config_1 = require("../config");
+
+var utils_1 = require("../utils/utils");
+/**
+ * 添加属性按钮
+ */
+
+
+var AddBtn =
+/** @class */
+function () {
+  function AddBtn(addBtn) {
+    this.addBtn = addBtn;
+
+    this.addBtnClickHandler = function (event) {
+      var uid = jquery_1.default(event.currentTarget).attr("data-uid");
+      var props = jquery_1.default("#add-props").val();
+      var propsValue = jquery_1.default("#add-value").val();
+
+      if (jquery_1.default(event.currentTarget).hasClass("text-node")) {
+        singleTip_1.singleTip("文本节点不能添加属性", "error");
+        return;
+      }
+
+      if (!uid) {
+        singleTip_1.singleTip("所选内容为空", "error");
+        return;
+      }
+
+      if (!props || !propsValue) {
+        singleTip_1.singleTip("属性名或属性值为空", "error");
+        return;
+      }
+
+      var domGraph = jquery_1.default("#" + uid);
+      var tag = domGraph.get(0).tagName;
+      var propsArr = domGraph.get(0).getAttributeNames();
+      var tagArr = Array.from(new Set(config_1.getProps(tag).concat(propsArr)));
+
+      if (tagArr.indexOf(props) !== -1) {
+        singleTip_1.singleTip("属性名不能重复");
+        return;
+      }
+
+      domGraph.attr(props, propsValue);
+      var domView = jquery_1.default("#dom-" + uid);
+      var propsWrap = domView.children(".head-wrap").children(".props-wrap");
+      var nameProps = propsWrap.children(".wrap-" + props);
+
+      if (propsValue == '' && nameProps.length !== 0) {
+        return nameProps.remove();
+      }
+
+      if (nameProps.length === 0) {
+        propsWrap.append("<span class=\"wrap-" + props + "\"><span class=\"props name-" + props + "\">" + props + "</span>=<span class=\"props-value\">" + propsValue + "</span></span>");
+      } else {
+        nameProps.children(".name-" + props).next().text(propsValue);
+      }
+
+      var inputId = uid + "_" + props;
+      var attrHtml = utils_1.createPropsAndValue(props, propsValue, uid, inputId);
+      jquery_1.default("#attr-wrap").append(attrHtml);
+    };
+
+    this.addBtn = addBtn;
+    this.bindAddBtnClick();
+  }
+
+  AddBtn.prototype.bindAddBtnClick = function () {
+    this.addBtn.on('click', this.addBtnClickHandler);
+  };
+
+  return AddBtn;
+}();
+
+exports.default = AddBtn;
+},{"jquery":"../node_modules/jquery/dist/jquery.js","./singleTip":"js/singleTip.ts","../config":"config.ts","../utils/utils":"utils/utils.ts"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -12205,203 +12441,21 @@ var svgInfo_1 = __importDefault(require("./js/svgInfo"));
 
 var editArea_1 = __importDefault(require("./js/editArea"));
 
-var config_1 = require("./config");
-
-var singleTip_1 = require("./js/singleTip");
-
 var domTree_1 = __importDefault(require("./js/domTree"));
 
 var selMenu_1 = __importDefault(require("./js/selMenu"));
+
+var attrArea_1 = __importDefault(require("./js/attrArea"));
+
+var addBtn_1 = __importDefault(require("./js/addBtn"));
 
 exports.svgInfo = new svgInfo_1.default(jquery_1.default('#graph').width() || 500, jquery_1.default('#graph').height() || 500, jquery_1.default('#graph-svg'));
 exports.domTree = new domTree_1.default(jquery_1.default("#dom-view"));
 var isChildTag = ["svg", 'g', 'text'];
 var editArea = new editArea_1.default(jquery_1.default('#edit'));
 var selMenu = new selMenu_1.default(jquery_1.default("#dom-view"));
-jquery_1.default("#add-btn").on('click', function (event) {
-  var uid = jquery_1.default(this).attr("data-uid");
-  var props = jquery_1.default("#add-props").val();
-  var propsValue = jquery_1.default("#add-value").val();
-
-  if (!uid) {
-    singleTip_1.singleTip("所选内容为空", "error");
-    return;
-  }
-
-  if (!props || !propsValue) {
-    singleTip_1.singleTip("属性名或属性值为空", "error");
-    return;
-  }
-
-  var domGraph = jquery_1.default("#" + uid);
-  var tag = domGraph.get(0).tagName;
-  var propsArr = domGraph.get(0).getAttributeNames();
-  var tagArr = Array.from(new Set(config_1.getProps(tag).concat(propsArr)));
-
-  if (tagArr.indexOf(props) !== -1) {
-    singleTip_1.singleTip("属性名不能重复");
-    return;
-  }
-
-  domGraph.attr(props, propsValue);
-  var domView = jquery_1.default("#dom-" + uid);
-  var propsWrap = domView.children(".head-wrap").children(".props-wrap");
-  var nameProps = propsWrap.children(".wrap-" + props);
-
-  if (propsValue == '' && nameProps.length !== 0) {
-    return nameProps.remove();
-  }
-
-  if (nameProps.length === 0) {
-    propsWrap.append("<span class=\"wrap-" + props + "\"><span class=\"props name-" + props + "\">" + props + "</span>=<span class=\"props-value\">" + propsValue + "</span></span>");
-  } else {
-    nameProps.children(".name-" + props).next().text(propsValue);
-  }
-
-  var inputId = uid + "_" + props;
-  var attrHtml = "\n                    <div class=\"aiwa-input aiwa-input-group aiwa-input-group--prepend\">\n                        <div class=\"aiwa-input-group__prepend\">" + props + "</div>\n                        <input type=\"text\"  value='" + propsValue + "' data-uid=" + uid + " id=" + inputId + " autocomplete=\"off\"\n                         placeholder='\u8BF7\u8F93\u5165\u5185\u5BB9' class=\"aiwa-input__inner\">\n                        <div class=\"delete-attr delete-btn\" data-uid=" + inputId + ">\u5220\u9664</div>\n                    </div>\n                ";
-  jquery_1.default("#attr-wrap").append(attrHtml);
-});
-jquery_1.default("#attr-wrap").on("click", ".delete-btn", function (event) {
-  var $target = jquery_1.default(event.target);
-  var uid = $target.attr("data-uid");
-
-  if (uid != null) {
-    var id_attrName = uid.split("_");
-    var id = id_attrName[0];
-    var attrName = id_attrName[1];
-    var domGraph = jquery_1.default("#" + id);
-    domGraph.removeAttr(attrName);
-    var domView = jquery_1.default("#dom-" + id);
-    var propsWrap = domView.children(".head-wrap").children(".props-wrap");
-    var nameProps = propsWrap.children(".wrap-" + attrName);
-
-    if (nameProps.length !== 0) {
-      nameProps.remove();
-    }
-  }
-
-  $target.parent().remove();
-});
-jquery_1.default("#attr-wrap").on("input", "input", function (event) {
-  var target = jquery_1.default(event.target);
-  var id = target.attr('id');
-  var propsValue = target.val();
-
-  if (id != null) {
-    var uid = id.split('_');
-
-    if (uid[1] && !config_1.checkInter(uid[1], propsValue)) {
-      singleTip_1.singleTip("请输入有效的数值");
-      return;
-    }
-
-    var domGraph = jquery_1.default("#" + uid[0]);
-    console.log(domGraph);
-
-    if (target.val()) {
-      domGraph.attr(uid[1], propsValue);
-    } else {
-      domGraph.removeAttr(uid[1]);
-    }
-
-    var domView = jquery_1.default("#dom-" + uid[0]);
-    var propsWrap = domView.children(".head-wrap").children(".props-wrap");
-    var nameProps = propsWrap.children(".wrap-" + uid[1]);
-
-    if (propsValue == '' && nameProps.length !== 0) {
-      return nameProps.remove();
-    }
-
-    if (nameProps.length === 0) {
-      propsWrap.append("<span class=\"wrap-" + uid[1] + "\"><span class=\"props name-" + uid[1] + "\">" + uid[1] + "</span>=<span class=\"props-value\">" + propsValue + "</span></span>");
-    } else {
-      nameProps.children(".name-" + uid[1]).next().text(propsValue);
-    }
-  }
-}); // let copyNode: any;
-// $("#menu").on('click', "li", function (event) {
-//     event.stopPropagation();
-//     let target = $(event.currentTarget);
-//     let type = target.attr("data-type")
-//     let oMenu = $("#menu")
-//     let cloneSvg: any;
-//     let selectSvg: any;
-//     if (type !== "paste-node" && type?.startsWith("paste")) {
-//         let copyUId = domTree.getSelectDom().attr("data-uid")
-//         let id = copyUId + Math.ceil(Math.random() * 1000)
-//         selectSvg = $("#" + copyUId)
-//         cloneSvg = selectSvg.clone(true);
-//         cloneSvg.attr("id", id)
-//         copyNode.attr("data-uid", id)
-//         copyNode.attr("id", "dom-" + id)
-//         copyNode.removeClass("select-dom")
-//     }
-//     switch (type) {
-//         case "remove-node":
-//             domTree.getSelectDom().remove()
-//             oMenu.css({
-//                 display: "none"
-//             })
-//             singleTip("删除节点成功")
-//             break;
-//         case "copy-node":
-//             oMenu.css({
-//                 display: "none"
-//             })
-//             let uid = domTree.getSelectDom().attr("data-uid")
-//             if (uid) {
-//                 let tag = uid.split("-")[0]
-//                 if (tag == "svg" || domTree.getSelectDom()[0].tagName == "g") {
-//                     singleTip("所选内容不是节点")
-//                     return copyNode = null
-//                 }
-//             }
-//             copyNode = domTree.getSelectDom().clone(true);
-//             singleTip("复制节点成功")
-//             break;
-//         case "paste-node":
-//             if (!copyNode) return singleTip("没有复制内容")
-//             $("#child-menu").css("display", "block");
-//
-//             break;
-//         case "copy-svg":
-//             oMenu.css({
-//                 display: "none"
-//             })
-//             singleTip("复制SVG成功")
-//             break;
-//         case "paste-after":
-//             selectSvg.after(cloneSvg)
-//             domTree.getSelectDom().after(copyNode)
-//             $("#child-menu").css("display", "none");
-//             oMenu.css("display", "none");
-//             singleTip("粘贴节点成功")
-//             break;
-//         case "paste-before":
-//             //之前
-//             singleTip("粘贴节点成功")
-//             $("#child-menu").css("display", "none");
-//             oMenu.css("display", "none");
-//             break;
-//         case "paste-child":
-//             $("#child-menu").css("display", "none");
-//             oMenu.css("display", "none");
-//             let tag = selectSvg.get(0).tagName;
-//             if (doubleTag.indexOf(tag) !== -1) {
-//                 selectSvg.append(cloneSvg)
-//                 domTree.getSelectDom().append(copyNode)
-//                 singleTip("粘贴节点成功")
-//             } else {
-//                 singleTip("所选节点没有子节点", "error")
-//             }
-//
-//             break;
-//     }
-//     console.log(type)
-//
-// })
-
+var atrrArea = new attrArea_1.default(jquery_1.default("#attr-wrap"));
+var addBtn = new addBtn_1.default(jquery_1.default("#add-btn"));
 var circle = createSVG_1.default.createSVG('circle', {
   cx: 100,
   cy: 50,
@@ -12410,7 +12464,7 @@ var circle = createSVG_1.default.createSVG('circle', {
   'stroke-width': 2,
   fill: 'red'
 });
-},{"./utils/createSVG":"utils/createSVG.ts","jquery":"../node_modules/jquery/dist/jquery.js","./js/svgInfo":"js/svgInfo.ts","./js/editArea":"js/editArea.ts","./config":"config.ts","./js/singleTip":"js/singleTip.ts","./js/domTree":"js/domTree.ts","./js/selMenu":"js/selMenu.ts"}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./utils/createSVG":"utils/createSVG.ts","jquery":"../node_modules/jquery/dist/jquery.js","./js/svgInfo":"js/svgInfo.ts","./js/editArea":"js/editArea.ts","./js/domTree":"js/domTree.ts","./js/selMenu":"js/selMenu.ts","./js/attrArea":"js/attrArea.ts","./js/addBtn":"js/addBtn.ts"}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
