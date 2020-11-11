@@ -1,111 +1,22 @@
 import SvgUtils from './utils/createSVG'
 import $ from 'jquery'
-import validateXML from "./utils/checkXML";
 import SvgInfo from "./js/svgInfo";
 import EditArea from "./js/editArea";
 import {getProps, SVG_TAG, checkInter} from './config'
-import {createSingleTips, createElementByVdom, svgType, deepKeyValue, doubleTag} from './utils/utils'
+import {doubleTag} from './utils/utils'
 import {singleTip} from "./js/singleTip";
+import DomTree from './js/domTree'
 
+let editArea: EditArea = new EditArea($('#edit'))
+export let svgInfo: SvgInfo = new SvgInfo($('#graph').width() || 500, $('#graph').height() || 500, $('#graph-svg'))
 let isChildTag: string[] = ["svg", 'g', 'text']
-$("#dom-view").on("click", '.icon', function (event) {
-    event.stopPropagation();
-    event.target.parentElement.classList.toggle("show-active")
-    if (event.target.classList.contains("icon-xiajiantou")) {
-        event.target.classList.remove("icon-xiajiantou")
-        event.target.classList.add("icon-sanjiaoright")
-    } else {
-        event.target.classList.remove("icon-sanjiaoright")
-        event.target.classList.add("icon-xiajiantou")
-    }
+let domTree: DomTree = new DomTree($("#dom-view"))
 
-})
-let prev: HTMLDivElement | null = null
-let selectDomFlag: boolean = false
-let editArea = new EditArea($('#edit'))
-export let svgInfo = new SvgInfo($('#graph').width() || 500, $('#graph').height() || 500)
-//选择dom区标签
-$("#dom-view").on("click", '.show-wrapper', function (event) {
-    let target = event.currentTarget
-    event.stopImmediatePropagation()
-    if (prev != null) {
-        prev.classList.toggle("select-dom")
-    }
-    target.classList.toggle("select-dom")
-    let uid: string = target.getAttribute("data-uid")
-    $("#add-btn").attr("data-uid", uid)
-    let selMark = $("#" + uid)
 
-    if (selMark[0]) {
-        let propsArr = selMark.get(0).getAttributeNames()
-        let tag = selMark.get(0).tagName
-        //固定属性加特有属性
-        let tagArr = Array.from(new Set(getProps(tag as SVG_TAG).concat(propsArr)))
-        let attrHtml = ''
-        tagArr.forEach((item: string) => {
-            if (item.trim() !== '') {
-                let value = selMark.attr(item) ? selMark.attr(item) : ""
-                let placeholder = selMark.attr(item) ? "请输入内容" : "未指定"
-                let inputId = uid + "_" + item
-                attrHtml += `
-                    <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend">
-                        <div class="aiwa-input-group__prepend">${item}</div>
-                        <input type="text" ${item == "id" ? "disabled" : ""} value='${value}' data-uid=${uid} id=${inputId} autocomplete="off"
-                         placeholder=${placeholder} class="aiwa-input__inner">
-                    </div>
-                `
-            }
+// let prev: HTMLDivElement | null = null
 
-        })
-        $("#attr-wrap").html(attrHtml)
-        let currentRect = selMark[0].getBoundingClientRect()
-        console.log(selMark[0])
-        let percentRect = $("#graph-svg")[0].getBoundingClientRect()
-        let x: number = 0
-        let y: number = 0
-        let setX: number = 0
-        let setY: number = 0
-        let scale = Math.ceil(((svgInfo.getScale() - 1) * 1000)) / 1000
-        let offsetX = currentRect.x - percentRect.x
-        let offsetY = currentRect.y - percentRect.y
-        //放大
-        if (scale > 0) {
-            x = scale * (currentRect.width / (1 + scale))
-            y = scale * (currentRect.height / (1 + scale))
-            setX = scale * (offsetX / (1 + scale))
-            setY = scale * (offsetY / (1 + scale))
-        } else {
-            //缩小
-            x = scale * (currentRect.width / (1 - Math.abs(scale)))
-            y = scale * (currentRect.height / (1 - Math.abs(scale)))
-            setX = scale * (offsetX / (1 - Math.abs(scale)))
-            setY = scale * (offsetY / (1 - Math.abs(scale)))
-        }
-        let width = currentRect.width
-        let height = currentRect.height
 
-        $("#rect-tip").attr({
-            x: offsetX - setX,
-            y: offsetY - setY,
-            width: width - x,
-            height: height - y
-        })
-        $("#rect-tip").css("display", "block");
-    }
 
-    prev = target
-    if (prev != null && prev.classList.contains("select-dom")) {
-        selectDomFlag = true
-    } else {
-        selectDomFlag = false
-    }
-    let oMenu = $("#menu")
-    if (oMenu.css("display") == "block") {
-        oMenu.css({
-            display: "none"
-        })
-    }
-})
 $("#add-btn").on('click', function (event) {
     let uid = $(this).attr("data-uid")
     let props = $("#add-props").val() as string
@@ -152,6 +63,7 @@ $("#add-btn").on('click', function (event) {
     $("#attr-wrap").append(attrHtml)
 
 })
+
 $("#attr-wrap").on("click", ".delete-btn", function (event) {
     let $target = $(event.target)
     let uid = $target.attr("data-uid")
@@ -202,10 +114,12 @@ $("#attr-wrap").on("input", "input", function (event) {
         }
     }
 })
+
+
 $("#dom-view").on('click', function () {
-    if (prev != null) {
-        prev.classList.remove("select-dom")
-        prev = null
+    if (domTree.getPrev() != null) {
+        domTree.getPrev().removeClass("select-dom")
+        domTree.setPrev(null)
     }
     let oMenu = $("#menu")
     let menuChild = $("#child-menu")
@@ -224,7 +138,7 @@ let selectDom: any = null;
 $("#dom-show").on('contextmenu ', '.show-wrapper', function (event) {
     event.preventDefault();
     event.stopPropagation();
-    if (!selectDomFlag) return
+    if (!domTree.getSelectDomFlag()) return
     selectDom = $(event.currentTarget)
     let _x = event.clientX,
         _y = event.clientY;

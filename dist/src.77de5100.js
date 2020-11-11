@@ -11265,8 +11265,6 @@ function () {
     this.scrollPower = 0.25;
     this.scale = 1;
     this.viewBox = "0,0,";
-    this.offsetLeft = 0;
-    this.offsetTop = 0;
     this.startX = 0;
     this.startY = 0;
     /**
@@ -11319,9 +11317,7 @@ function () {
 
     this.width = width;
     this.height = height;
-    this.svg = jquery_1.default('#graph-svg');
-    this.offsetLeft = this.svg.offset().left;
-    this.offsetTop = this.svg.offset().top;
+    this.svg = svg;
     this.svg.attr({
       width: width,
       height: height
@@ -11331,8 +11327,8 @@ function () {
     this.bindMousedown();
   }
 
-  SvgInfo.prototype.setScale = function (widthScale) {
-    this.scale = widthScale;
+  SvgInfo.prototype.setScale = function (scale) {
+    this.scale = scale;
   };
 
   SvgInfo.prototype.getScale = function () {
@@ -11832,7 +11828,200 @@ function checkInter(str, val) {
 }
 
 exports.checkInter = checkInter;
-},{}],"index.ts":[function(require,module,exports) {
+},{}],"js/domTree.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var jquery_1 = __importDefault(require("jquery"));
+
+var config_1 = require("../config");
+
+var index_1 = require("../index");
+
+var DomTree =
+/** @class */
+function () {
+  function DomTree(domView) {
+    var _this = this;
+
+    this.domView = domView;
+    this.selectDomFlag = false;
+    this.selectDom = null;
+
+    this.domViewClickHandler = function (event) {
+      if (_this.getPrev() != null) {
+        _this.getPrev().removeClass("select-dom");
+
+        _this.setPrev(null);
+      }
+
+      var oMenu = jquery_1.default("#menu");
+      var menuChild = jquery_1.default("#child-menu");
+
+      if (oMenu.css("display") == "block") {
+        oMenu.css({
+          display: "none"
+        });
+      }
+
+      menuChild.css({
+        display: "none"
+      });
+      jquery_1.default("#rect-tip").css("display", "none");
+
+      _this.setSelectDom(null);
+    };
+
+    this.iconClickHandler = function (event) {
+      event.stopPropagation();
+      var $target = jquery_1.default(event.target);
+      $target.parent().toggleClass("show-active");
+
+      if ($target.hasClass("icon-xiajiantou")) {
+        $target.removeClass("icon-xiajiantou");
+        $target.addClass("icon-sanjiaoright");
+      } else {
+        $target.removeClass("icon-sanjiaoright");
+        $target.addClass("icon-xiajiantou");
+      }
+    };
+
+    this.showWrapClickHandler = function (event) {
+      var target = jquery_1.default(event.currentTarget);
+      event.stopImmediatePropagation();
+
+      if (_this.prev != null) {
+        _this.prev.toggleClass("select-dom");
+      }
+
+      target.toggleClass("select-dom");
+      var uid = target.attr("data-uid");
+      jquery_1.default("#add-btn").attr("data-uid", uid);
+      var selMark = jquery_1.default("#" + uid);
+
+      if (selMark[0]) {
+        var propsArr = selMark.get(0).getAttributeNames();
+        var tag = selMark.get(0).tagName; //固定属性加特有属性
+
+        var tagArr = Array.from(new Set(config_1.getProps(tag).concat(propsArr)));
+        var attrHtml_1 = '';
+        tagArr.forEach(function (item) {
+          if (item.trim() !== '') {
+            var value = selMark.attr(item) ? selMark.attr(item) : "";
+            var placeholder = selMark.attr(item) ? "请输入内容" : "未指定";
+            var inputId = uid + "_" + item;
+            attrHtml_1 += "\n                    <div class=\"aiwa-input aiwa-input-group aiwa-input-group--prepend\">\n                        <div class=\"aiwa-input-group__prepend\">" + item + "</div>\n                        <input type=\"text\" " + (item == "id" ? "disabled" : "") + " value='" + value + "' data-uid=" + uid + " id=" + inputId + " autocomplete=\"off\"\n                         placeholder=" + placeholder + " class=\"aiwa-input__inner\">\n                    </div>\n                ";
+          }
+        });
+        jquery_1.default("#attr-wrap").html(attrHtml_1);
+        var currentRect = selMark[0].getBoundingClientRect();
+        console.log(selMark[0]);
+        var percentRect = jquery_1.default("#graph-svg")[0].getBoundingClientRect();
+        var x = 0;
+        var y = 0;
+        var setX = 0;
+        var setY = 0;
+        var scale = Math.ceil((index_1.svgInfo.getScale() - 1) * 1000) / 1000;
+        var offsetX = currentRect.x - percentRect.x;
+        var offsetY = currentRect.y - percentRect.y; //放大
+
+        if (scale > 0) {
+          x = scale * (currentRect.width / (1 + scale));
+          y = scale * (currentRect.height / (1 + scale));
+          setX = scale * (offsetX / (1 + scale));
+          setY = scale * (offsetY / (1 + scale));
+        } else {
+          //缩小
+          x = scale * (currentRect.width / (1 - Math.abs(scale)));
+          y = scale * (currentRect.height / (1 - Math.abs(scale)));
+          setX = scale * (offsetX / (1 - Math.abs(scale)));
+          setY = scale * (offsetY / (1 - Math.abs(scale)));
+        }
+
+        var width = currentRect.width;
+        var height = currentRect.height;
+        jquery_1.default("#rect-tip").attr({
+          x: offsetX - setX,
+          y: offsetY - setY,
+          width: width - x,
+          height: height - y
+        });
+        jquery_1.default("#rect-tip").css("display", "block");
+      }
+
+      _this.prev = target;
+
+      if (_this.prev != null && _this.prev.hasClass("select-dom")) {
+        _this.selectDomFlag = true;
+      } else {
+        _this.selectDomFlag = false;
+      }
+
+      var oMenu = jquery_1.default("#menu");
+
+      if (oMenu.css("display") == "block") {
+        oMenu.css({
+          display: "none"
+        });
+      }
+    };
+
+    this.domView = domView;
+    this.bindIconClick();
+    this.bindshowWrapClick();
+    this.bindDomViewClick();
+  }
+
+  DomTree.prototype.setPrev = function (prev) {
+    this.prev = prev;
+  };
+
+  DomTree.prototype.getPrev = function () {
+    return this.prev;
+  };
+
+  DomTree.prototype.setSelectDom = function (selectDom) {
+    this.selectDom = selectDom;
+  };
+
+  DomTree.prototype.getSelectDom = function () {
+    return this.selectDom;
+  };
+
+  DomTree.prototype.setSelectDomFlag = function (selectDomFlag) {
+    this.selectDomFlag = selectDomFlag;
+  };
+
+  DomTree.prototype.getSelectDomFlag = function () {
+    return this.selectDomFlag;
+  };
+
+  DomTree.prototype.bindDomViewClick = function () {
+    this.domView.on('click', '.icon', this.domViewClickHandler);
+  };
+
+  DomTree.prototype.bindIconClick = function () {
+    this.domView.on('click', '.icon', this.iconClickHandler);
+  };
+
+  DomTree.prototype.bindshowWrapClick = function () {
+    this.domView.on('click', '.show-wrapper', this.showWrapClickHandler);
+  };
+
+  return DomTree;
+}();
+
+exports.default = DomTree;
+},{"jquery":"../node_modules/jquery/dist/jquery.js","../config":"config.ts","../index":"index.ts"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -11860,103 +12049,13 @@ var utils_1 = require("./utils/utils");
 
 var singleTip_1 = require("./js/singleTip");
 
-var isChildTag = ["svg", 'g', 'text'];
-jquery_1.default("#dom-view").on("click", '.icon', function (event) {
-  event.stopPropagation();
-  event.target.parentElement.classList.toggle("show-active");
+var domTree_1 = __importDefault(require("./js/domTree"));
 
-  if (event.target.classList.contains("icon-xiajiantou")) {
-    event.target.classList.remove("icon-xiajiantou");
-    event.target.classList.add("icon-sanjiaoright");
-  } else {
-    event.target.classList.remove("icon-sanjiaoright");
-    event.target.classList.add("icon-xiajiantou");
-  }
-});
-var prev = null;
-var selectDomFlag = false;
 var editArea = new editArea_1.default(jquery_1.default('#edit'));
-exports.svgInfo = new svgInfo_1.default(jquery_1.default('#graph').width() || 500, jquery_1.default('#graph').height() || 500); //选择dom区标签
+exports.svgInfo = new svgInfo_1.default(jquery_1.default('#graph').width() || 500, jquery_1.default('#graph').height() || 500, jquery_1.default('#graph-svg'));
+var isChildTag = ["svg", 'g', 'text'];
+var domTree = new domTree_1.default(jquery_1.default("#dom-view")); // let prev: HTMLDivElement | null = null
 
-jquery_1.default("#dom-view").on("click", '.show-wrapper', function (event) {
-  var target = event.currentTarget;
-  event.stopImmediatePropagation();
-
-  if (prev != null) {
-    prev.classList.toggle("select-dom");
-  }
-
-  target.classList.toggle("select-dom");
-  var uid = target.getAttribute("data-uid");
-  jquery_1.default("#add-btn").attr("data-uid", uid);
-  var selMark = jquery_1.default("#" + uid);
-
-  if (selMark[0]) {
-    var propsArr = selMark.get(0).getAttributeNames();
-    var tag = selMark.get(0).tagName; //固定属性加特有属性
-
-    var tagArr = Array.from(new Set(config_1.getProps(tag).concat(propsArr)));
-    var attrHtml_1 = '';
-    tagArr.forEach(function (item) {
-      if (item.trim() !== '') {
-        var value = selMark.attr(item) ? selMark.attr(item) : "";
-        var placeholder = selMark.attr(item) ? "请输入内容" : "未指定";
-        var inputId = uid + "_" + item;
-        attrHtml_1 += "\n                    <div class=\"aiwa-input aiwa-input-group aiwa-input-group--prepend\">\n                        <div class=\"aiwa-input-group__prepend\">" + item + "</div>\n                        <input type=\"text\" " + (item == "id" ? "disabled" : "") + " value='" + value + "' data-uid=" + uid + " id=" + inputId + " autocomplete=\"off\"\n                         placeholder=" + placeholder + " class=\"aiwa-input__inner\">\n                    </div>\n                ";
-      }
-    });
-    jquery_1.default("#attr-wrap").html(attrHtml_1);
-    var currentRect = selMark[0].getBoundingClientRect();
-    console.log(selMark[0]);
-    var percentRect = jquery_1.default("#graph-svg")[0].getBoundingClientRect();
-    var x = 0;
-    var y = 0;
-    var setX = 0;
-    var setY = 0;
-    var scale = Math.ceil((exports.svgInfo.getScale() - 1) * 1000) / 1000;
-    var offsetX = currentRect.x - percentRect.x;
-    var offsetY = currentRect.y - percentRect.y; //放大
-
-    if (scale > 0) {
-      x = scale * (currentRect.width / (1 + scale));
-      y = scale * (currentRect.height / (1 + scale));
-      setX = scale * (offsetX / (1 + scale));
-      setY = scale * (offsetY / (1 + scale));
-    } else {
-      //缩小
-      x = scale * (currentRect.width / (1 - Math.abs(scale)));
-      y = scale * (currentRect.height / (1 - Math.abs(scale)));
-      setX = scale * (offsetX / (1 - Math.abs(scale)));
-      setY = scale * (offsetY / (1 - Math.abs(scale)));
-    }
-
-    var width = currentRect.width;
-    var height = currentRect.height;
-    jquery_1.default("#rect-tip").attr({
-      x: offsetX - setX,
-      y: offsetY - setY,
-      width: width - x,
-      height: height - y
-    });
-    jquery_1.default("#rect-tip").css("display", "block");
-  }
-
-  prev = target;
-
-  if (prev != null && prev.classList.contains("select-dom")) {
-    selectDomFlag = true;
-  } else {
-    selectDomFlag = false;
-  }
-
-  var oMenu = jquery_1.default("#menu");
-
-  if (oMenu.css("display") == "block") {
-    oMenu.css({
-      display: "none"
-    });
-  }
-});
 jquery_1.default("#add-btn").on('click', function (event) {
   var uid = jquery_1.default(this).attr("data-uid");
   var props = jquery_1.default("#add-props").val();
@@ -12060,9 +12159,9 @@ jquery_1.default("#attr-wrap").on("input", "input", function (event) {
   }
 });
 jquery_1.default("#dom-view").on('click', function () {
-  if (prev != null) {
-    prev.classList.remove("select-dom");
-    prev = null;
+  if (domTree.getPrev() != null) {
+    domTree.getPrev().removeClass("select-dom");
+    domTree.setPrev(null);
   }
 
   var oMenu = jquery_1.default("#menu");
@@ -12084,7 +12183,7 @@ var selectDom = null;
 jquery_1.default("#dom-show").on('contextmenu ', '.show-wrapper', function (event) {
   event.preventDefault();
   event.stopPropagation();
-  if (!selectDomFlag) return;
+  if (!domTree.getSelectDomFlag()) return;
   selectDom = jquery_1.default(event.currentTarget);
   var _x = event.clientX,
       _y = event.clientY;
@@ -12197,7 +12296,7 @@ var circle = createSVG_1.default.createSVG('circle', {
   'stroke-width': 2,
   fill: 'red'
 });
-},{"./utils/createSVG":"utils/createSVG.ts","jquery":"../node_modules/jquery/dist/jquery.js","./js/svgInfo":"js/svgInfo.ts","./js/editArea":"js/editArea.ts","./config":"config.ts","./utils/utils":"utils/utils.ts","./js/singleTip":"js/singleTip.ts"}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./utils/createSVG":"utils/createSVG.ts","jquery":"../node_modules/jquery/dist/jquery.js","./js/svgInfo":"js/svgInfo.ts","./js/editArea":"js/editArea.ts","./config":"config.ts","./utils/utils":"utils/utils.ts","./js/singleTip":"js/singleTip.ts","./js/domTree":"js/domTree.ts"}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;

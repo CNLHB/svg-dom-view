@@ -11,17 +11,13 @@ class SvgInfo {
     public scrollPower: number = 0.25
     public scale: number = 1
     public viewBox: string = "0,0,"
-    public offsetLeft: number = 0
-    public offsetTop: number = 0
     public startX: number = 0
     public startY: number = 0
 
-    constructor(width: number, height: number, public svg?: any) {
+    constructor(width: number, height: number, public svg: any) {
         this.width = width;
         this.height = height;
-        this.svg = $('#graph-svg');
-        this.offsetLeft = this.svg.offset().left;
-        this.offsetTop = this.svg.offset().top;
+        this.svg = svg;
         this.svg.attr({
             width, height
         });
@@ -31,8 +27,8 @@ class SvgInfo {
 
     }
 
-    setScale(widthScale: number) {
-        this.scale = widthScale
+    setScale(scale: number) {
+        this.scale = scale
     }
 
     getScale(): number {
