@@ -13,7 +13,14 @@
     <div class="show show-edit" id="edit" contenteditable="true">
     </div>
     <div class="show show-view" id="graph">
+<!--        <span>DOM树展示区2222222222222222222222222</span>-->
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="graph-svg" preserveAspectRatio="xMinYMin" transform="translate(0,0)">
+                <rect x="0" y="0" width="100" height="100" opacity=".1" style="fill:#4959aa;stroke-width:1;stroke:rgb(0,0,0)"></rect>
+                <circle cx="100" cy="50" r="40" stroke="black" stroke-width="2" fill="red"></circle>
+                <text x="0" y="15" fill="red">I love SVG</text>
+                <text x="0" y="15" fill="red"></text>
+                <!--xx-->
+                <polyline points="20,20 40,25 60,40 80,120 120,140 200,180" style="fill:none;stroke:black;stroke-width:3"></polyline>
 
         </svg>
 
@@ -143,7 +150,7 @@
     </div>
     <div class="show show-attr" id="show-attr">
         <h1>Attribute属性展示区</h1>
-        <div>
+        <div id="add-wrap">
             <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend" style="padding-bottom: 10px">
                 <div class="aiwa-input-group__prepend">props</div>
                 <input type="text" id="add-props" autocomplete="off" placeholder="请输入属性名" class="aiwa-input__inner">

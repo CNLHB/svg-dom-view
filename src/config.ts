@@ -53,15 +53,3 @@ export function checkInter(str: string, val: string):boolean {
     return true
 }
 
-// async getIdDetails(id){
-//     let ret = await this.$api.get(this.$apiList.materialId,{
-//         put:{
-//             id
-//         },
-//         param:{
-//             type:1
-//         }
-//
-//     })
-//     this.dialogData = ret.data
-// }

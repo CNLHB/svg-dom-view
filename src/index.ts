@@ -1,10 +1,13 @@
 import SvgUtils from './utils/createSVG'
 import $ from 'jquery'
 import validateXML from "./utils/checkXML";
-import SvgInfo from "./utils/svgInfo";
+import SvgInfo from "./js/svgInfo";
+import EditArea from "./js/editArea";
 import {getProps, SVG_TAG, checkInter} from './config'
-let svgType: string[] = ["svg", "g", "path", "text", "line", "rect", "ellipse", "circle", "polyline", "polygon"]
-let doubleTag: string[] = ["svg", "g", "text"]
+import {createSingleTips, createElementByVdom, svgType, deepKeyValue, doubleTag} from './utils/utils'
+import {singleTip} from "./js/singleTip";
+
+let isChildTag: string[] = ["svg", 'g', 'text']
 $("#dom-view").on("click", '.icon', function (event) {
     event.stopPropagation();
     event.target.parentElement.classList.toggle("show-active")
@@ -17,8 +20,10 @@ $("#dom-view").on("click", '.icon', function (event) {
     }
 
 })
-let prev = null
+let prev: HTMLDivElement | null = null
 let selectDomFlag: boolean = false
+let editArea = new EditArea($('#edit'))
+export let svgInfo = new SvgInfo($('#graph').width() || 500, $('#graph').height() || 500)
 //选择dom区标签
 $("#dom-view").on("click", '.show-wrapper', function (event) {
     let target = event.currentTarget
@@ -54,18 +59,42 @@ $("#dom-view").on("click", '.show-wrapper', function (event) {
         })
         $("#attr-wrap").html(attrHtml)
         let currentRect = selMark[0].getBoundingClientRect()
+        console.log(selMark[0])
         let percentRect = $("#graph-svg")[0].getBoundingClientRect()
+        let x: number = 0
+        let y: number = 0
+        let setX: number = 0
+        let setY: number = 0
+        let scale = Math.ceil(((svgInfo.getScale() - 1) * 1000)) / 1000
+        let offsetX = currentRect.x - percentRect.x
+        let offsetY = currentRect.y - percentRect.y
+        //放大
+        if (scale > 0) {
+            x = scale * (currentRect.width / (1 + scale))
+            y = scale * (currentRect.height / (1 + scale))
+            setX = scale * (offsetX / (1 + scale))
+            setY = scale * (offsetY / (1 + scale))
+        } else {
+            //缩小
+            x = scale * (currentRect.width / (1 - Math.abs(scale)))
+            y = scale * (currentRect.height / (1 - Math.abs(scale)))
+            setX = scale * (offsetX / (1 - Math.abs(scale)))
+            setY = scale * (offsetY / (1 - Math.abs(scale)))
+        }
+        let width = currentRect.width
+        let height = currentRect.height
+
         $("#rect-tip").attr({
-            x: currentRect.x - percentRect.x,
-            y: currentRect.y - percentRect.y,
-            width: currentRect.width,
-            height: currentRect.height
+            x: offsetX - setX,
+            y: offsetY - setY,
+            width: width - x,
+            height: height - y
         })
         $("#rect-tip").css("display", "block");
     }
 
     prev = target
-    if (prev.classList.contains("select-dom")) {
+    if (prev != null && prev.classList.contains("select-dom")) {
         selectDomFlag = true
     } else {
         selectDomFlag = false
@@ -78,14 +107,18 @@ $("#dom-view").on("click", '.show-wrapper', function (event) {
     }
 })
 $("#add-btn").on('click', function (event) {
-    console.log()
     let uid = $(this).attr("data-uid")
     let props = $("#add-props").val() as string
     let propsValue = $("#add-value").val() as string
-    if (!props || !propsValue) {
-        singleTip("属性名或属性值为空")
+    if (!uid) {
+        singleTip("所选内容为空", "error")
         return
     }
+    if (!props || !propsValue) {
+        singleTip("属性名或属性值为空", "error")
+        return
+    }
+
     let domGraph = $("#" + uid)
     let tag = domGraph.get(0).tagName
     let propsArr = domGraph.get(0).getAttributeNames()
@@ -138,8 +171,6 @@ $("#attr-wrap").on("click", ".delete-btn", function (event) {
     }
     $target.parent().remove()
 })
-
-
 $("#attr-wrap").on("input", "input", function (event) {
     let target = $(event.target)
     let id = target.attr('id')
@@ -171,18 +202,21 @@ $("#attr-wrap").on("input", "input", function (event) {
         }
     }
 })
-
 $("#dom-view").on('click', function () {
     if (prev != null) {
         prev.classList.remove("select-dom")
         prev = null
     }
     let oMenu = $("#menu")
+    let menuChild = $("#child-menu")
     if (oMenu.css("display") == "block") {
         oMenu.css({
             display: "none"
         })
     }
+    menuChild.css({
+        display: "none"
+    })
     $("#rect-tip").css("display", "none");
     selectDom = null
 })
@@ -209,16 +243,16 @@ $("#menu").on('click', "li", function (event) {
     let target = $(event.currentTarget);
     let type = target.attr("data-type")
     let oMenu = $("#menu")
-    let cloneSvg:any;
-    let selectSvg:any;
-    if(type !== "paste-node"&&type?.startsWith("paste")){
+    let cloneSvg: any;
+    let selectSvg: any;
+    if (type !== "paste-node" && type?.startsWith("paste")) {
         let copyUId = selectDom.attr("data-uid")
-        let id = copyUId + Math.ceil(Math.random()*1000)
+        let id = copyUId + Math.ceil(Math.random() * 1000)
         selectSvg = $("#" + copyUId)
         cloneSvg = selectSvg.clone(true);
         cloneSvg.attr("id", id)
         copyNode.attr("data-uid", id)
-        // copyNode.attr("id",id)
+        copyNode.attr("id", "dom-" + id)
         copyNode.removeClass("select-dom")
     }
     switch (type) {
@@ -259,219 +293,33 @@ $("#menu").on('click', "li", function (event) {
             selectSvg.after(cloneSvg)
             selectDom.after(copyNode)
             $("#child-menu").css("display", "none");
-            oMenu.css({
-                display: "none"
-            })
+            oMenu.css("display", "none");
             singleTip("粘贴节点成功")
             break;
         case "paste-before":
             //之前
-            selectSvg.before(cloneSvg)
-            selectDom.before(copyNode)
             singleTip("粘贴节点成功")
             $("#child-menu").css("display", "none");
-            oMenu.css({
-                display: "none"
-            })
+            oMenu.css("display", "none");
             break;
         case "paste-child":
             $("#child-menu").css("display", "none");
-            oMenu.css({
-                display: "none"
-            })
+            oMenu.css("display", "none");
             let tag = selectSvg.get(0).tagName;
+            if (doubleTag.indexOf(tag) !== -1) {
+                selectSvg.append(cloneSvg)
+                selectDom.append(copyNode)
+                singleTip("粘贴节点成功")
+            } else {
+                singleTip("所选节点没有子节点", "error")
+            }
 
-            console.log(selectSvg);
-            // selectSvg.append(cloneSvg)
-            // selectDom.append(copyNode)
-            singleTip("粘贴节点成功")
             break;
     }
     console.log(type)
 
 })
-//匹配标签
-let checkSvgTag = /(?<=<)[a-z]+(?=[>| ])/g;
-//匹配标签
-let matchSvg = /<[a-z]+([\s\S]*?)>|<!--([\s\S]*?)-->/g;
-//匹配svg
-let matchSvgTag = /<svg([\s\S]*?)<\/svg>/g
-let singleTip = createSingleTips()
-let edit: HTMLDivElement | null;
-let graph: HTMLDivElement | null;
-let menu: HTMLDivElement | null = document.querySelector("#menu");
-let editText: string = '';
-let editHtml: string = '';
-let svgInfo: SvgInfo;
-edit = document.querySelector("#edit");
-graph = document.querySelector('#graph')
-if (graph !== null) {
-    svgInfo = new SvgInfo(graph.clientWidth, graph.clientHeight)
-}
-if (edit !== null) {
-    edit.addEventListener('input', keyupChangeHandler)
-}
 
-function keyupChangeHandler(event: Event) {
-    if (event.target) {
-        editText = (event.target as HTMLDivElement).innerText.trim()
-        editHtml = (event.target as HTMLDivElement).innerHTML
-    }
-    let svgArr = editText.match(matchSvgTag) == null ? [] : editText.match(matchSvgTag)
-    let svgArrTag = editText.match(matchSvg) == null ? [] : editText.match(matchSvg)
-    let tagNameArr = editText.match(checkSvgTag)
-    // console.log(tagNameArr)
-    // console.log(svgArrTag)
-    let showDom = $("#dom-show")
-    tagNameArr?.forEach((item: string) => {
-        if (svgType.indexOf(item) == -1) {
-            // editHtml = editHtml.replace(RegExp(`<${item}`,'g'),`<${item} style='color:red'`)
-            singleTip(`${item} is not an svg tag`)
-            console.warn(`${item} is not an svg tag`)
-        }
-    })
-    let checkXML = validateXML(editText)
-    // console.log(editText)
-
-    if (checkXML.error_code == 1) {
-        if (checkXML.msg.indexOf("mismatch") > -1) {
-            //error on line 3 at column 10: Opening and ending tag mismatch: svg1 line 0 and svg
-            console.log("标签不匹配")
-            console.log(checkXML.msg)
-            singleTip(checkXML.msg)
-        } else if (checkXML.msg.indexOf("attributes") > -1) {
-            singleTip(checkXML.msg)
-            console.log("属性不正确")
-        } else if (checkXML.msg.indexOf("attribute") > -1) {
-            singleTip(checkXML.msg)
-            console.log(checkXML.msg)
-            console.log("错误解析属性名 circlecx")
-        } else if (checkXML.msg.indexOf("&gt") > -1) {
-            singleTip(checkXML.msg)
-            console.log("标签未正确闭合empty")
-        } else if (checkXML.msg.indexOf("empty") > -1) {
-            singleTip(checkXML.msg)
-            console.log("请输入正确的svg标签")
-        } else {
-            console.log(checkXML.msg)
-        }
-
-    } else {
-        console.log(validateXML(editText).msg)
-    }
-    // @ts-ignore
-    let fragment: DocumentFragment = document.createDocumentFragment();
-
-    fragment.appendChild($(editText)[0])
-    let nodes: any = null
-    nodes = fragment.firstElementChild
-    let vdom = deepKeyValue(nodes)
-    $(svgInfo.svg).html(fragment)
-    let rectTips = SvgUtils.createSVG(
-        'rect',
-        {
-            x: 0, y: 0, width: 0, height: 0, stroke: '#89cff0',
-            opacity: "0.5",
-            id: 'rect-tip',
-            'stroke-width': 2, fill: '#89cff0'
-        });
-    $("#graph-svg").append(rectTips)
-    showDom.html(createElementByVdom(vdom))
-    // edit&&(edit.innerHTML = editHtml)
-
-}
-
-/**
- *
- * @param vdom
- * return dom
- */
-function createElementByVdom(vdom: IVDomNode) {
-    let isText = typeof vdom.children === 'string'
-    let len = vdom.children.length;
-    let child;
-    if (isText && len == 0) {
-        return ''
-    }
-    let isDobuleTag = doubleTag.indexOf(vdom.tag as string) != -1
-    let str = '';
-    // @ts-ignore
-    Object.entries(vdom.props).forEach((item) => {
-        if (item[0] !== "data-uid" && item[0].trim()) {
-            str += `<span class="wrap-${item[0]}"><span class="props name-${item[0]}">${item[0]}</span>=<span class="props-value">${item[1]}</span></span>`
-        }
-    })
-    let isShriColumn = false;
-    var dom = `
-    <div  data-uid=${vdom.props['data-uid']} id=${"dom-" + vdom.props['data-uid']} class="show-wrapper">
-    ${len === 0 ? "" : '<icon  class="icon iconfont icon-sanjiaoright"></icon>'}
-    <span class='${isDobuleTag ? "double-head" : "head"} head-wrap'>${vdom.tag}<span class="props-wrap">${str}</span>
-    </span>
-        <div class="tree-children">
-         ${isText == true ? vdom.children :
-        (Array.isArray(vdom.children) ? createElemTextByVdom(vdom.children) : '')}
-         </div>
-    ${len == 0 ? "" : '<span class="hiddle">...</span>'}
-   ${isDobuleTag ? `<span class=${len == 0 ? "foot-one" : "foot"}>${vdom.tag}</span>` : ''}
-    </div>
-    `
-
-    return dom
-}
-
-function createElemTextByVdom(vdom: IVDomNode[]) {
-    let strDom = ''
-    vdom.forEach(item => {
-        strDom += createElementByVdom(item)
-    })
-    return strDom
-}
-
-
-interface IProps {
-    [key: string]: string
-}
-
-interface IVDomNode {
-    tag?: string;
-    props: IProps;
-    children: IVDomNode[] | string
-}
-
-function deepKeyValue(nodes: any) {
-
-    let obj: IVDomNode = {
-        props: {},
-        children: []
-    }
-    let tag = nodes.nodeName
-    obj.tag = tag
-    let props = nodes.getAttributeNames()
-    if (tag === "text") {
-        obj.children = nodes.innerHTML
-    }
-
-    props.forEach((item: string) => {
-        if (item.trim() !== '') {
-            obj.props[item] = nodes.getAttribute(item).trim()
-        }
-    })
-    if (props.indexOf("id") == -1) {
-        let id = tag + "-" + parseInt((Math.random() * 10000).toString()).toString()
-        nodes.setAttribute("id", id)
-        obj.props["data-uid"] = id
-    }
-    if (nodes.childNodes.length == 0) return obj
-    let child = nodes.childNodes
-    for (let i = 0; i < child.length; i++) {
-        if (child[i].nodeType === 1 && svgType.indexOf(child[i].nodeName) > -1) {
-            if (typeof obj.children !== "string") {
-                obj.children.push(deepKeyValue(child[i]))
-            }
-        }
-    }
-    return obj
-}
 
 let circle = SvgUtils.createSVG(
     'circle',
@@ -480,46 +328,4 @@ let circle = SvgUtils.createSVG(
         'stroke-width': 2, fill: 'red'
     });
 
-function createSingleTips() {
-    let instance: HTMLDivElement;
-    let clear: number | null;
-    return function (text: string) {
-        if (instance) {
-            clear && clearTimeout(clear)
-            instance.innerHTML = `
-                <div role="alert" class="el-notification right" style="top: 16px; z-index: 2027;">
-					<div class="el-notification__group">
-						<h2 class="el-notification__title">提示</h2>
-						<div class="el-notification__content">
-							<p>${text}</p></div>
-						<div class="el-notification__closeBtn el-icon-close"></div>
-					</div>
-				</div>
-                `
-            instance.style.display = 'block'
-        } else {
-            instance = document.createElement("div");
-            instance.id = "tips"
-            instance.innerHTML = `
-                <div role="alert" class="el-notification right" style="top: 16px; z-index: 2027;">
-					<div class="el-notification__group">
-						<h2 class="el-notification__title">提示</h2>
-						<div class="el-notification__content">
-							<p>${text}</p></div>
-						<div class="el-notification__closeBtn el-icon-close"></div>
-					</div>
-				</div>
-                `
-            instance.style.display = 'block'
-            document.body.appendChild(instance)
-        }
-        clear = setTimeout(() => {
-            instance && (instance.style.display = 'none')
-            clear && clearTimeout(clear)
-            clear = null
-        }, 5000)
-
-    }
-
-}
 

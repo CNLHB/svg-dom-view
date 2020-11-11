@@ -45,8 +45,9 @@ html, body, ul, li {
 
 }
 
-#graph-svg svg {
-    border: 1px solid yellow;
+#graph-svg >svg {
+    border: 1px solid greenyellow;
+    overflow: inherit;
 }
 
 .form-control {
@@ -101,7 +102,6 @@ h1 {
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
     transition: opacity .3s, transform .3s, left .3s, right .3s, top .4s, bottom .3s;
     overflow: hidden;
-    color: red;
 }
 
 .show-active {
