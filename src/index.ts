@@ -13,8 +13,6 @@ let isChildTag: string[] = ["svg", 'g', 'text']
 let domTree: DomTree = new DomTree($("#dom-view"))
 
 
-// let prev: HTMLDivElement | null = null
-
 
 
 $("#add-btn").on('click', function (event) {
@@ -116,41 +114,6 @@ $("#attr-wrap").on("input", "input", function (event) {
 })
 
 
-$("#dom-view").on('click', function () {
-    if (domTree.getPrev() != null) {
-        domTree.getPrev().removeClass("select-dom")
-        domTree.setPrev(null)
-    }
-    let oMenu = $("#menu")
-    let menuChild = $("#child-menu")
-    if (oMenu.css("display") == "block") {
-        oMenu.css({
-            display: "none"
-        })
-    }
-    menuChild.css({
-        display: "none"
-    })
-    $("#rect-tip").css("display", "none");
-    selectDom = null
-})
-let selectDom: any = null;
-$("#dom-show").on('contextmenu ', '.show-wrapper', function (event) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!domTree.getSelectDomFlag()) return
-    selectDom = $(event.currentTarget)
-    let _x = event.clientX,
-        _y = event.clientY;
-    let oMenu = $("#menu")
-    oMenu.css({
-        display: "block",
-        left: _x + "px",
-        top: _y + "px"
-    })
-    console.log('comtextmenu')
-
-})
 let copyNode: any;
 $("#menu").on('click', "li", function (event) {
     event.stopPropagation();
@@ -160,7 +123,7 @@ $("#menu").on('click', "li", function (event) {
     let cloneSvg: any;
     let selectSvg: any;
     if (type !== "paste-node" && type?.startsWith("paste")) {
-        let copyUId = selectDom.attr("data-uid")
+        let copyUId = domTree.getSelectDom().attr("data-uid")
         let id = copyUId + Math.ceil(Math.random() * 1000)
         selectSvg = $("#" + copyUId)
         cloneSvg = selectSvg.clone(true);
@@ -171,7 +134,7 @@ $("#menu").on('click', "li", function (event) {
     }
     switch (type) {
         case "remove-node":
-            selectDom.remove()
+            domTree.getSelectDom().remove()
             oMenu.css({
                 display: "none"
             })
@@ -181,15 +144,15 @@ $("#menu").on('click', "li", function (event) {
             oMenu.css({
                 display: "none"
             })
-            let uid = selectDom.attr("data-uid")
+            let uid = domTree.getSelectDom().attr("data-uid")
             if (uid) {
                 let tag = uid.split("-")[0]
-                if (tag == "svg" || selectDom[0].tagName == "g") {
+                if (tag == "svg" || domTree.getSelectDom()[0].tagName == "g") {
                     singleTip("所选内容不是节点")
                     return copyNode = null
                 }
             }
-            copyNode = selectDom.clone(true);
+            copyNode = domTree.getSelectDom().clone(true);
             singleTip("复制节点成功")
             break;
         case "paste-node":
@@ -205,7 +168,7 @@ $("#menu").on('click', "li", function (event) {
             break;
         case "paste-after":
             selectSvg.after(cloneSvg)
-            selectDom.after(copyNode)
+            domTree.getSelectDom().after(copyNode)
             $("#child-menu").css("display", "none");
             oMenu.css("display", "none");
             singleTip("粘贴节点成功")
@@ -222,7 +185,7 @@ $("#menu").on('click', "li", function (event) {
             let tag = selectSvg.get(0).tagName;
             if (doubleTag.indexOf(tag) !== -1) {
                 selectSvg.append(cloneSvg)
-                selectDom.append(copyNode)
+                domTree.getSelectDom().append(copyNode)
                 singleTip("粘贴节点成功")
             } else {
                 singleTip("所选节点没有子节点", "error")

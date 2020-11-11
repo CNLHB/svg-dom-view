@@ -11857,6 +11857,24 @@ function () {
     this.selectDomFlag = false;
     this.selectDom = null;
 
+    this.domViewContextmenuHandler = function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!_this.selectDomFlag) return;
+
+      _this.setSelectDom(jquery_1.default(event.currentTarget));
+
+      var _x = event.clientX,
+          _y = event.clientY;
+      var oMenu = jquery_1.default("#menu");
+      oMenu.css({
+        display: "block",
+        left: _x + "px",
+        top: _y + "px"
+      });
+      console.log('comtextmenu');
+    };
+
     this.domViewClickHandler = function (event) {
       if (_this.getPrev() != null) {
         _this.getPrev().removeClass("select-dom");
@@ -11979,6 +11997,7 @@ function () {
     this.bindIconClick();
     this.bindshowWrapClick();
     this.bindDomViewClick();
+    this.bindDomViewContextmenu();
   }
 
   DomTree.prototype.setPrev = function (prev) {
@@ -12006,7 +12025,11 @@ function () {
   };
 
   DomTree.prototype.bindDomViewClick = function () {
-    this.domView.on('click', '.icon', this.domViewClickHandler);
+    this.domView.on('click', this.domViewClickHandler);
+  };
+
+  DomTree.prototype.bindDomViewContextmenu = function () {
+    this.domView.on('contextmenu', '.show-wrapper', this.domViewContextmenuHandler);
   };
 
   DomTree.prototype.bindIconClick = function () {
@@ -12054,8 +12077,7 @@ var domTree_1 = __importDefault(require("./js/domTree"));
 var editArea = new editArea_1.default(jquery_1.default('#edit'));
 exports.svgInfo = new svgInfo_1.default(jquery_1.default('#graph').width() || 500, jquery_1.default('#graph').height() || 500, jquery_1.default('#graph-svg'));
 var isChildTag = ["svg", 'g', 'text'];
-var domTree = new domTree_1.default(jquery_1.default("#dom-view")); // let prev: HTMLDivElement | null = null
-
+var domTree = new domTree_1.default(jquery_1.default("#dom-view"));
 jquery_1.default("#add-btn").on('click', function (event) {
   var uid = jquery_1.default(this).attr("data-uid");
   var props = jquery_1.default("#add-props").val();
@@ -12158,43 +12180,6 @@ jquery_1.default("#attr-wrap").on("input", "input", function (event) {
     }
   }
 });
-jquery_1.default("#dom-view").on('click', function () {
-  if (domTree.getPrev() != null) {
-    domTree.getPrev().removeClass("select-dom");
-    domTree.setPrev(null);
-  }
-
-  var oMenu = jquery_1.default("#menu");
-  var menuChild = jquery_1.default("#child-menu");
-
-  if (oMenu.css("display") == "block") {
-    oMenu.css({
-      display: "none"
-    });
-  }
-
-  menuChild.css({
-    display: "none"
-  });
-  jquery_1.default("#rect-tip").css("display", "none");
-  selectDom = null;
-});
-var selectDom = null;
-jquery_1.default("#dom-show").on('contextmenu ', '.show-wrapper', function (event) {
-  event.preventDefault();
-  event.stopPropagation();
-  if (!domTree.getSelectDomFlag()) return;
-  selectDom = jquery_1.default(event.currentTarget);
-  var _x = event.clientX,
-      _y = event.clientY;
-  var oMenu = jquery_1.default("#menu");
-  oMenu.css({
-    display: "block",
-    left: _x + "px",
-    top: _y + "px"
-  });
-  console.log('comtextmenu');
-});
 var copyNode;
 jquery_1.default("#menu").on('click', "li", function (event) {
   event.stopPropagation();
@@ -12205,7 +12190,7 @@ jquery_1.default("#menu").on('click', "li", function (event) {
   var selectSvg;
 
   if (type !== "paste-node" && (type === null || type === void 0 ? void 0 : type.startsWith("paste"))) {
-    var copyUId = selectDom.attr("data-uid");
+    var copyUId = domTree.getSelectDom().attr("data-uid");
     var id = copyUId + Math.ceil(Math.random() * 1000);
     selectSvg = jquery_1.default("#" + copyUId);
     cloneSvg = selectSvg.clone(true);
@@ -12217,7 +12202,7 @@ jquery_1.default("#menu").on('click', "li", function (event) {
 
   switch (type) {
     case "remove-node":
-      selectDom.remove();
+      domTree.getSelectDom().remove();
       oMenu.css({
         display: "none"
       });
@@ -12228,18 +12213,18 @@ jquery_1.default("#menu").on('click', "li", function (event) {
       oMenu.css({
         display: "none"
       });
-      var uid = selectDom.attr("data-uid");
+      var uid = domTree.getSelectDom().attr("data-uid");
 
       if (uid) {
         var tag_1 = uid.split("-")[0];
 
-        if (tag_1 == "svg" || selectDom[0].tagName == "g") {
+        if (tag_1 == "svg" || domTree.getSelectDom()[0].tagName == "g") {
           singleTip_1.singleTip("所选内容不是节点");
           return copyNode = null;
         }
       }
 
-      copyNode = selectDom.clone(true);
+      copyNode = domTree.getSelectDom().clone(true);
       singleTip_1.singleTip("复制节点成功");
       break;
 
@@ -12257,7 +12242,7 @@ jquery_1.default("#menu").on('click', "li", function (event) {
 
     case "paste-after":
       selectSvg.after(cloneSvg);
-      selectDom.after(copyNode);
+      domTree.getSelectDom().after(copyNode);
       jquery_1.default("#child-menu").css("display", "none");
       oMenu.css("display", "none");
       singleTip_1.singleTip("粘贴节点成功");
@@ -12277,7 +12262,7 @@ jquery_1.default("#menu").on('click', "li", function (event) {
 
       if (utils_1.doubleTag.indexOf(tag) !== -1) {
         selectSvg.append(cloneSvg);
-        selectDom.append(copyNode);
+        domTree.getSelectDom().append(copyNode);
         singleTip_1.singleTip("粘贴节点成功");
       } else {
         singleTip_1.singleTip("所选节点没有子节点", "error");

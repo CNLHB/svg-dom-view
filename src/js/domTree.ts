@@ -2,6 +2,7 @@ import ClickEvent = JQuery.ClickEvent;
 import $ from 'jquery'
 import {getProps, SVG_TAG} from "../config";
 import {svgInfo} from "../index";
+import ContextMenuEvent = JQuery.ContextMenuEvent;
 
 class DomTree {
     private prev: any;
@@ -13,6 +14,7 @@ class DomTree {
         this.bindIconClick()
         this.bindshowWrapClick()
         this.bindDomViewClick()
+        this.bindDomViewContextmenu()
     }
 
     setPrev(prev: any): void {
@@ -40,7 +42,11 @@ class DomTree {
     }
 
     bindDomViewClick() {
-        this.domView.on('click', '.icon', this.domViewClickHandler)
+        this.domView.on('click', this.domViewClickHandler)
+    }
+
+    bindDomViewContextmenu() {
+        this.domView.on('contextmenu', '.show-wrapper', this.domViewContextmenuHandler)
     }
 
     bindIconClick() {
@@ -49,6 +55,22 @@ class DomTree {
 
     bindshowWrapClick() {
         this.domView.on('click', '.show-wrapper', this.showWrapClickHandler)
+    }
+
+    domViewContextmenuHandler = (event: ContextMenuEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!this.selectDomFlag) return
+        this.setSelectDom($(event.currentTarget))
+        let _x = event.clientX,
+            _y = event.clientY;
+        let oMenu = $("#menu")
+        oMenu.css({
+            display: "block",
+            left: _x + "px",
+            top: _y + "px"
+        })
+        console.log('comtextmenu')
     }
 
     domViewClickHandler = (event: ClickEvent) => {
