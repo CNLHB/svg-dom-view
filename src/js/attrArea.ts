@@ -1,8 +1,8 @@
 
 class AtrrArea{
 
-    constructor(){
-
+    constructor(public atrrArea: any){
+        this.atrrArea = atrrArea
     }
 }
 

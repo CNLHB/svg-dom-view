@@ -6,11 +6,12 @@ import {getProps, SVG_TAG, checkInter} from './config'
 import {doubleTag} from './utils/utils'
 import {singleTip} from "./js/singleTip";
 import DomTree from './js/domTree'
-
-let editArea: EditArea = new EditArea($('#edit'))
+import SelMenu from './js/selMenu'
 export let svgInfo: SvgInfo = new SvgInfo($('#graph').width() || 500, $('#graph').height() || 500, $('#graph-svg'))
+export let domTree: DomTree = new DomTree($("#dom-view"))
 let isChildTag: string[] = ["svg", 'g', 'text']
-let domTree: DomTree = new DomTree($("#dom-view"))
+let editArea: EditArea = new EditArea($('#edit'))
+let selMenu: SelMenu = new SelMenu($("#dom-view"))
 
 
 
@@ -114,88 +115,88 @@ $("#attr-wrap").on("input", "input", function (event) {
 })
 
 
-let copyNode: any;
-$("#menu").on('click', "li", function (event) {
-    event.stopPropagation();
-    let target = $(event.currentTarget);
-    let type = target.attr("data-type")
-    let oMenu = $("#menu")
-    let cloneSvg: any;
-    let selectSvg: any;
-    if (type !== "paste-node" && type?.startsWith("paste")) {
-        let copyUId = domTree.getSelectDom().attr("data-uid")
-        let id = copyUId + Math.ceil(Math.random() * 1000)
-        selectSvg = $("#" + copyUId)
-        cloneSvg = selectSvg.clone(true);
-        cloneSvg.attr("id", id)
-        copyNode.attr("data-uid", id)
-        copyNode.attr("id", "dom-" + id)
-        copyNode.removeClass("select-dom")
-    }
-    switch (type) {
-        case "remove-node":
-            domTree.getSelectDom().remove()
-            oMenu.css({
-                display: "none"
-            })
-            singleTip("删除节点成功")
-            break;
-        case "copy-node":
-            oMenu.css({
-                display: "none"
-            })
-            let uid = domTree.getSelectDom().attr("data-uid")
-            if (uid) {
-                let tag = uid.split("-")[0]
-                if (tag == "svg" || domTree.getSelectDom()[0].tagName == "g") {
-                    singleTip("所选内容不是节点")
-                    return copyNode = null
-                }
-            }
-            copyNode = domTree.getSelectDom().clone(true);
-            singleTip("复制节点成功")
-            break;
-        case "paste-node":
-            if (!copyNode) return singleTip("没有复制内容")
-            $("#child-menu").css("display", "block");
-
-            break;
-        case "copy-svg":
-            oMenu.css({
-                display: "none"
-            })
-            singleTip("复制SVG成功")
-            break;
-        case "paste-after":
-            selectSvg.after(cloneSvg)
-            domTree.getSelectDom().after(copyNode)
-            $("#child-menu").css("display", "none");
-            oMenu.css("display", "none");
-            singleTip("粘贴节点成功")
-            break;
-        case "paste-before":
-            //之前
-            singleTip("粘贴节点成功")
-            $("#child-menu").css("display", "none");
-            oMenu.css("display", "none");
-            break;
-        case "paste-child":
-            $("#child-menu").css("display", "none");
-            oMenu.css("display", "none");
-            let tag = selectSvg.get(0).tagName;
-            if (doubleTag.indexOf(tag) !== -1) {
-                selectSvg.append(cloneSvg)
-                domTree.getSelectDom().append(copyNode)
-                singleTip("粘贴节点成功")
-            } else {
-                singleTip("所选节点没有子节点", "error")
-            }
-
-            break;
-    }
-    console.log(type)
-
-})
+// let copyNode: any;
+// $("#menu").on('click', "li", function (event) {
+//     event.stopPropagation();
+//     let target = $(event.currentTarget);
+//     let type = target.attr("data-type")
+//     let oMenu = $("#menu")
+//     let cloneSvg: any;
+//     let selectSvg: any;
+//     if (type !== "paste-node" && type?.startsWith("paste")) {
+//         let copyUId = domTree.getSelectDom().attr("data-uid")
+//         let id = copyUId + Math.ceil(Math.random() * 1000)
+//         selectSvg = $("#" + copyUId)
+//         cloneSvg = selectSvg.clone(true);
+//         cloneSvg.attr("id", id)
+//         copyNode.attr("data-uid", id)
+//         copyNode.attr("id", "dom-" + id)
+//         copyNode.removeClass("select-dom")
+//     }
+//     switch (type) {
+//         case "remove-node":
+//             domTree.getSelectDom().remove()
+//             oMenu.css({
+//                 display: "none"
+//             })
+//             singleTip("删除节点成功")
+//             break;
+//         case "copy-node":
+//             oMenu.css({
+//                 display: "none"
+//             })
+//             let uid = domTree.getSelectDom().attr("data-uid")
+//             if (uid) {
+//                 let tag = uid.split("-")[0]
+//                 if (tag == "svg" || domTree.getSelectDom()[0].tagName == "g") {
+//                     singleTip("所选内容不是节点")
+//                     return copyNode = null
+//                 }
+//             }
+//             copyNode = domTree.getSelectDom().clone(true);
+//             singleTip("复制节点成功")
+//             break;
+//         case "paste-node":
+//             if (!copyNode) return singleTip("没有复制内容")
+//             $("#child-menu").css("display", "block");
+//
+//             break;
+//         case "copy-svg":
+//             oMenu.css({
+//                 display: "none"
+//             })
+//             singleTip("复制SVG成功")
+//             break;
+//         case "paste-after":
+//             selectSvg.after(cloneSvg)
+//             domTree.getSelectDom().after(copyNode)
+//             $("#child-menu").css("display", "none");
+//             oMenu.css("display", "none");
+//             singleTip("粘贴节点成功")
+//             break;
+//         case "paste-before":
+//             //之前
+//             singleTip("粘贴节点成功")
+//             $("#child-menu").css("display", "none");
+//             oMenu.css("display", "none");
+//             break;
+//         case "paste-child":
+//             $("#child-menu").css("display", "none");
+//             oMenu.css("display", "none");
+//             let tag = selectSvg.get(0).tagName;
+//             if (doubleTag.indexOf(tag) !== -1) {
+//                 selectSvg.append(cloneSvg)
+//                 domTree.getSelectDom().append(copyNode)
+//                 singleTip("粘贴节点成功")
+//             } else {
+//                 singleTip("所选节点没有子节点", "error")
+//             }
+//
+//             break;
+//     }
+//     console.log(type)
+//
+// })
 
 
 let circle = SvgUtils.createSVG(

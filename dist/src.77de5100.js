@@ -12044,7 +12044,7 @@ function () {
 }();
 
 exports.default = DomTree;
-},{"jquery":"../node_modules/jquery/dist/jquery.js","../config":"config.ts","../index":"index.ts"}],"index.ts":[function(require,module,exports) {
+},{"jquery":"../node_modules/jquery/dist/jquery.js","../config":"config.ts","../index":"index.ts"}],"js/selMenu.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -12056,7 +12056,146 @@ var __importDefault = this && this.__importDefault || function (mod) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.svgInfo = void 0;
+
+var jquery_1 = __importDefault(require("jquery"));
+
+var singleTip_1 = require("./singleTip");
+
+var utils_1 = require("../utils/utils");
+
+var index_1 = require("../index");
+
+var SelMenu =
+/** @class */
+function () {
+  function SelMenu(menu) {
+    var _this = this;
+
+    this.menu = menu;
+
+    this.menuClickHandler = function (event) {
+      event.stopPropagation();
+      var target = jquery_1.default(event.currentTarget);
+      var type = target.attr("data-type");
+      var oMenu = jquery_1.default("#menu");
+      var cloneSvg;
+      var selectSvg;
+
+      if (type !== "paste-node" && (type === null || type === void 0 ? void 0 : type.startsWith("paste"))) {
+        var copyUId = index_1.domTree.getSelectDom().attr("data-uid");
+        var id = copyUId + Math.ceil(Math.random() * 1000);
+        selectSvg = jquery_1.default("#" + copyUId);
+        cloneSvg = selectSvg.clone(true);
+        cloneSvg.attr("id", id);
+
+        _this.copyNode.attr("data-uid", id);
+
+        _this.copyNode.attr("id", "dom-" + id);
+
+        _this.copyNode.removeClass("select-dom");
+      }
+
+      switch (type) {
+        case "remove-node":
+          index_1.domTree.getSelectDom().remove();
+          oMenu.css({
+            display: "none"
+          });
+          singleTip_1.singleTip("删除节点成功");
+          break;
+
+        case "copy-node":
+          oMenu.css({
+            display: "none"
+          });
+          var uid = index_1.domTree.getSelectDom().attr("data-uid");
+
+          if (uid) {
+            var tag_1 = uid.split("-")[0];
+
+            if (tag_1 == "svg" || index_1.domTree.getSelectDom()[0].tagName == "g") {
+              singleTip_1.singleTip("所选内容不是节点", "error");
+              return _this.copyNode = null;
+            }
+          }
+
+          _this.copyNode = index_1.domTree.getSelectDom().clone(true);
+          singleTip_1.singleTip("复制节点成功");
+          break;
+
+        case "paste-node":
+          if (!_this.copyNode) return singleTip_1.singleTip("没有复制内容", "error");
+          jquery_1.default("#child-menu").css("display", "block");
+          break;
+
+        case "copy-svg":
+          oMenu.css({
+            display: "none"
+          });
+          singleTip_1.singleTip("复制SVG成功");
+          break;
+
+        case "paste-after":
+          selectSvg.after(cloneSvg);
+          index_1.domTree.getSelectDom().after(_this.copyNode);
+          jquery_1.default("#child-menu").css("display", "none");
+          oMenu.css("display", "none");
+          singleTip_1.singleTip("粘贴节点成功");
+          break;
+
+        case "paste-before":
+          //之前
+          selectSvg.before(cloneSvg);
+          index_1.domTree.getSelectDom().before(_this.copyNode);
+          singleTip_1.singleTip("粘贴节点成功");
+          jquery_1.default("#child-menu").css("display", "none");
+          oMenu.css("display", "none");
+          break;
+
+        case "paste-child":
+          jquery_1.default("#child-menu").css("display", "none");
+          oMenu.css("display", "none");
+          var tag = selectSvg.get(0).tagName;
+
+          if (utils_1.doubleTag.indexOf(tag) !== -1) {
+            selectSvg.append(cloneSvg);
+            index_1.domTree.getSelectDom().append(_this.copyNode);
+            singleTip_1.singleTip("粘贴节点成功");
+          } else {
+            singleTip_1.singleTip("所选节点没有子节点", "error");
+          }
+
+          break;
+      }
+
+      console.log(type);
+    };
+
+    this.menu = menu;
+    this.bindMenuClick();
+  }
+
+  SelMenu.prototype.bindMenuClick = function () {
+    this.menu.on('click', "li", this.menuClickHandler);
+  };
+
+  return SelMenu;
+}();
+
+exports.default = SelMenu;
+},{"jquery":"../node_modules/jquery/dist/jquery.js","./singleTip":"js/singleTip.ts","../utils/utils":"utils/utils.ts","../index":"index.ts"}],"index.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.domTree = exports.svgInfo = void 0;
 
 var createSVG_1 = __importDefault(require("./utils/createSVG"));
 
@@ -12068,16 +12207,17 @@ var editArea_1 = __importDefault(require("./js/editArea"));
 
 var config_1 = require("./config");
 
-var utils_1 = require("./utils/utils");
-
 var singleTip_1 = require("./js/singleTip");
 
 var domTree_1 = __importDefault(require("./js/domTree"));
 
-var editArea = new editArea_1.default(jquery_1.default('#edit'));
+var selMenu_1 = __importDefault(require("./js/selMenu"));
+
 exports.svgInfo = new svgInfo_1.default(jquery_1.default('#graph').width() || 500, jquery_1.default('#graph').height() || 500, jquery_1.default('#graph-svg'));
+exports.domTree = new domTree_1.default(jquery_1.default("#dom-view"));
 var isChildTag = ["svg", 'g', 'text'];
-var domTree = new domTree_1.default(jquery_1.default("#dom-view"));
+var editArea = new editArea_1.default(jquery_1.default('#edit'));
+var selMenu = new selMenu_1.default(jquery_1.default("#dom-view"));
 jquery_1.default("#add-btn").on('click', function (event) {
   var uid = jquery_1.default(this).attr("data-uid");
   var props = jquery_1.default("#add-props").val();
@@ -12179,100 +12319,89 @@ jquery_1.default("#attr-wrap").on("input", "input", function (event) {
       nameProps.children(".name-" + uid[1]).next().text(propsValue);
     }
   }
-});
-var copyNode;
-jquery_1.default("#menu").on('click', "li", function (event) {
-  event.stopPropagation();
-  var target = jquery_1.default(event.currentTarget);
-  var type = target.attr("data-type");
-  var oMenu = jquery_1.default("#menu");
-  var cloneSvg;
-  var selectSvg;
+}); // let copyNode: any;
+// $("#menu").on('click', "li", function (event) {
+//     event.stopPropagation();
+//     let target = $(event.currentTarget);
+//     let type = target.attr("data-type")
+//     let oMenu = $("#menu")
+//     let cloneSvg: any;
+//     let selectSvg: any;
+//     if (type !== "paste-node" && type?.startsWith("paste")) {
+//         let copyUId = domTree.getSelectDom().attr("data-uid")
+//         let id = copyUId + Math.ceil(Math.random() * 1000)
+//         selectSvg = $("#" + copyUId)
+//         cloneSvg = selectSvg.clone(true);
+//         cloneSvg.attr("id", id)
+//         copyNode.attr("data-uid", id)
+//         copyNode.attr("id", "dom-" + id)
+//         copyNode.removeClass("select-dom")
+//     }
+//     switch (type) {
+//         case "remove-node":
+//             domTree.getSelectDom().remove()
+//             oMenu.css({
+//                 display: "none"
+//             })
+//             singleTip("删除节点成功")
+//             break;
+//         case "copy-node":
+//             oMenu.css({
+//                 display: "none"
+//             })
+//             let uid = domTree.getSelectDom().attr("data-uid")
+//             if (uid) {
+//                 let tag = uid.split("-")[0]
+//                 if (tag == "svg" || domTree.getSelectDom()[0].tagName == "g") {
+//                     singleTip("所选内容不是节点")
+//                     return copyNode = null
+//                 }
+//             }
+//             copyNode = domTree.getSelectDom().clone(true);
+//             singleTip("复制节点成功")
+//             break;
+//         case "paste-node":
+//             if (!copyNode) return singleTip("没有复制内容")
+//             $("#child-menu").css("display", "block");
+//
+//             break;
+//         case "copy-svg":
+//             oMenu.css({
+//                 display: "none"
+//             })
+//             singleTip("复制SVG成功")
+//             break;
+//         case "paste-after":
+//             selectSvg.after(cloneSvg)
+//             domTree.getSelectDom().after(copyNode)
+//             $("#child-menu").css("display", "none");
+//             oMenu.css("display", "none");
+//             singleTip("粘贴节点成功")
+//             break;
+//         case "paste-before":
+//             //之前
+//             singleTip("粘贴节点成功")
+//             $("#child-menu").css("display", "none");
+//             oMenu.css("display", "none");
+//             break;
+//         case "paste-child":
+//             $("#child-menu").css("display", "none");
+//             oMenu.css("display", "none");
+//             let tag = selectSvg.get(0).tagName;
+//             if (doubleTag.indexOf(tag) !== -1) {
+//                 selectSvg.append(cloneSvg)
+//                 domTree.getSelectDom().append(copyNode)
+//                 singleTip("粘贴节点成功")
+//             } else {
+//                 singleTip("所选节点没有子节点", "error")
+//             }
+//
+//             break;
+//     }
+//     console.log(type)
+//
+// })
 
-  if (type !== "paste-node" && (type === null || type === void 0 ? void 0 : type.startsWith("paste"))) {
-    var copyUId = domTree.getSelectDom().attr("data-uid");
-    var id = copyUId + Math.ceil(Math.random() * 1000);
-    selectSvg = jquery_1.default("#" + copyUId);
-    cloneSvg = selectSvg.clone(true);
-    cloneSvg.attr("id", id);
-    copyNode.attr("data-uid", id);
-    copyNode.attr("id", "dom-" + id);
-    copyNode.removeClass("select-dom");
-  }
-
-  switch (type) {
-    case "remove-node":
-      domTree.getSelectDom().remove();
-      oMenu.css({
-        display: "none"
-      });
-      singleTip_1.singleTip("删除节点成功");
-      break;
-
-    case "copy-node":
-      oMenu.css({
-        display: "none"
-      });
-      var uid = domTree.getSelectDom().attr("data-uid");
-
-      if (uid) {
-        var tag_1 = uid.split("-")[0];
-
-        if (tag_1 == "svg" || domTree.getSelectDom()[0].tagName == "g") {
-          singleTip_1.singleTip("所选内容不是节点");
-          return copyNode = null;
-        }
-      }
-
-      copyNode = domTree.getSelectDom().clone(true);
-      singleTip_1.singleTip("复制节点成功");
-      break;
-
-    case "paste-node":
-      if (!copyNode) return singleTip_1.singleTip("没有复制内容");
-      jquery_1.default("#child-menu").css("display", "block");
-      break;
-
-    case "copy-svg":
-      oMenu.css({
-        display: "none"
-      });
-      singleTip_1.singleTip("复制SVG成功");
-      break;
-
-    case "paste-after":
-      selectSvg.after(cloneSvg);
-      domTree.getSelectDom().after(copyNode);
-      jquery_1.default("#child-menu").css("display", "none");
-      oMenu.css("display", "none");
-      singleTip_1.singleTip("粘贴节点成功");
-      break;
-
-    case "paste-before":
-      //之前
-      singleTip_1.singleTip("粘贴节点成功");
-      jquery_1.default("#child-menu").css("display", "none");
-      oMenu.css("display", "none");
-      break;
-
-    case "paste-child":
-      jquery_1.default("#child-menu").css("display", "none");
-      oMenu.css("display", "none");
-      var tag = selectSvg.get(0).tagName;
-
-      if (utils_1.doubleTag.indexOf(tag) !== -1) {
-        selectSvg.append(cloneSvg);
-        domTree.getSelectDom().append(copyNode);
-        singleTip_1.singleTip("粘贴节点成功");
-      } else {
-        singleTip_1.singleTip("所选节点没有子节点", "error");
-      }
-
-      break;
-  }
-
-  console.log(type);
-});
 var circle = createSVG_1.default.createSVG('circle', {
   cx: 100,
   cy: 50,
@@ -12281,7 +12410,7 @@ var circle = createSVG_1.default.createSVG('circle', {
   'stroke-width': 2,
   fill: 'red'
 });
-},{"./utils/createSVG":"utils/createSVG.ts","jquery":"../node_modules/jquery/dist/jquery.js","./js/svgInfo":"js/svgInfo.ts","./js/editArea":"js/editArea.ts","./config":"config.ts","./utils/utils":"utils/utils.ts","./js/singleTip":"js/singleTip.ts","./js/domTree":"js/domTree.ts"}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./utils/createSVG":"utils/createSVG.ts","jquery":"../node_modules/jquery/dist/jquery.js","./js/svgInfo":"js/svgInfo.ts","./js/editArea":"js/editArea.ts","./config":"config.ts","./js/singleTip":"js/singleTip.ts","./js/domTree":"js/domTree.ts","./js/selMenu":"js/selMenu.ts"}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
