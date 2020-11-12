@@ -11274,8 +11274,6 @@ function () {
     this.mousedownHandler = function (event) {
       _this.startX = event.pageX;
       _this.startY = event.pageY;
-      var target = event.target;
-      var offset = jquery_1.default(target).offset();
       jquery_1.default(document).on('mousemove', _this.mousemoveHandler);
     };
     /**
@@ -11366,7 +11364,7 @@ function () {
       return;
     }
 
-    var viewBox = '';
+    var viewBox;
     var tmp = [0, 0, 0, 0];
     var str = this.svg.attr("viewBox");
 
@@ -11446,14 +11444,20 @@ function getElementToPageLeft(el, key) {
   return actualTop;
 }
 
+function Nullable() {}
+
 function createSingleTips() {
   var instance;
   var clear;
   return function (text, type) {
-    var color = "#409eff";
+    if (type === void 0) {
+      type = "default";
+    }
+
+    var color = "";
 
     switch (type) {
-      case undefined:
+      case "default":
         color = "#409eff";
         break;
 
@@ -11486,7 +11490,7 @@ function createSingleTips() {
       instance && (instance.style.display = 'none');
       clear && clearTimeout(clear);
       clear = null;
-    }, 2000);
+    }, 5000);
   };
 }
 
@@ -11514,7 +11518,7 @@ function createElementByVdom(vdom) {
     }
   });
   var isShriColumn = false;
-  var dom = "\n    <div  data-uid=" + vdom.props['data-uid'] + " id=" + ("dom-" + vdom.props['data-uid']) + " class=\"show-wrapper\">\n    " + (len === 0 ? "" : '<icon  class="icon iconfont icon-sanjiaoright"></icon>') + "\n    <span class='" + (isDobuleTag ? "double-head" : "head") + " head-wrap'>" + vdom.tag + "<span class=\"props-wrap\">" + str + "</span>\n    </span>\n     " + (isText == true ? "<div data-uid=" + vdom.props['data-uid'] + " class=\"text-node show-wrapper tree-children\">" + vdom.children + "</div>" : len > 0 ? "<div class=\"tree-children\">" + createElemTextByVdom(vdom.children) + "</div>" : '') + "\n\n    " + (len == 0 ? "" : '<span class="hiddle">...</span>') + "\n   " + (isDobuleTag ? "<span class=" + (len == 0 ? "foot-one" : "foot") + ">" + vdom.tag + "</span>" : '') + "\n    </div>\n    ";
+  var dom = "\n    <div  data-uid=" + vdom.props['data-uid'] + " id=" + ("dom-" + vdom.props['data-uid']) + " class=\"show-wrapper\">\n    " + (len === 0 ? "" : '<icon  class="icon iconfont icon-sanjiaoright"></icon>') + "\n    <span class='" + (isDobuleTag ? "double-head" : "head") + " head-wrap'>" + vdom.tag + "<span class=\"props-wrap\">" + str + "</span>\n    </span>\n     " + (isText == true ? "<div data-uid=" + vdom.props['data-uid'] + " class=\"text-node show-wrapper tree-children\">" + vdom.children + "</div>" : len > 0 ? "<div class=\"tree-children\">" + createElemTextByVdom(vdom.children) + "</div>" : '') + "\n    " + (len == 0 ? "" : '<span class="hiddle">...</span>') + "\n    " + (isDobuleTag ? "<span class=" + (len == 0 ? "foot-one" : "foot") + ">" + vdom.tag + "</span>" : '') + "\n    </div>\n    ";
   return dom;
 }
 
@@ -11659,140 +11663,16 @@ exports.singleTip = void 0;
 var utils_1 = require("../utils/utils");
 
 exports.singleTip = utils_1.createSingleTips();
-},{"../utils/utils":"utils/utils.ts"}],"js/editArea.ts":[function(require,module,exports) {
-"use strict";
-
-var __importDefault = this && this.__importDefault || function (mod) {
-  return mod && mod.__esModule ? mod : {
-    "default": mod
-  };
-};
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-}); //匹配标签
-
-var jquery_1 = __importDefault(require("jquery"));
-
-var utils_1 = require("../utils/utils");
-
-var checkXML_1 = __importDefault(require("../utils/checkXML"));
-
-var createSVG_1 = __importDefault(require("../utils/createSVG"));
-
-var singleTip_1 = require("./singleTip");
-
-var index_1 = require("../index");
-
-var checkSvgTag = /(?<=<)[a-z]+(?=[>| ])/g; //匹配标签
-
-var matchSvg = /<[a-z]+([\s\S]*?)>|<!--([\s\S]*?)-->/g; //匹配svg
-
-var matchSvgTag = /<svg([\s\S]*?)<\/svg>/g;
-
-var EditArea =
-/** @class */
-function () {
-  function EditArea(edit) {
-    var _this = this;
-
-    this.edit = edit;
-    this.editText = "";
-    this.editHtml = "";
-
-    this.bindInputChange = function () {
-      _this.edit.on('input', _this.inputChangeHandler);
-    };
-
-    this.inputChangeHandler = function (event) {
-      if (event.target) {
-        _this.editText = event.target.innerText.trim();
-        _this.editHtml = event.target.innerHTML;
-      }
-
-      var svgArr = _this.editText.match(matchSvgTag) == null ? [] : _this.editText.match(matchSvgTag);
-      var svgArrTag = _this.editText.match(matchSvg) == null ? [] : _this.editText.match(matchSvg);
-
-      var tagNameArr = _this.editText.match(checkSvgTag); // console.log(tagNameArr)
-      // console.log(svgArrTag)
-
-
-      var showDom = jquery_1.default("#dom-show");
-      tagNameArr === null || tagNameArr === void 0 ? void 0 : tagNameArr.forEach(function (item) {
-        if (utils_1.svgType.indexOf(item) == -1) {
-          // editHtml = editHtml.replace(RegExp(`<${item}`,'g'),`<${item} style='color:red'`)
-          singleTip_1.singleTip(item + " is not an svg tag");
-          console.warn(item + " is not an svg tag");
-        }
-      });
-      var checkXML = checkXML_1.default(_this.editText);
-
-      if (checkXML.error_code == 1) {
-        if (checkXML.msg.indexOf("mismatch") > -1) {
-          //error on line 3 at column 10: Opening and ending tag mismatch: svg1 line 0 and svg
-          console.log("标签不匹配");
-          console.log(checkXML.msg);
-          singleTip_1.singleTip(checkXML.msg);
-        } else if (checkXML.msg.indexOf("attributes") > -1) {
-          singleTip_1.singleTip(checkXML.msg);
-          console.log("属性不正确");
-        } else if (checkXML.msg.indexOf("attribute") > -1) {
-          singleTip_1.singleTip(checkXML.msg);
-          console.log(checkXML.msg);
-          console.log("错误解析属性名 circlecx");
-        } else if (checkXML.msg.indexOf("&gt") > -1) {
-          singleTip_1.singleTip(checkXML.msg);
-          console.log("标签未正确闭合empty");
-        } else if (checkXML.msg.indexOf("empty") > -1) {
-          singleTip_1.singleTip(checkXML.msg);
-          console.log("请输入正确的svg标签");
-        } else {
-          console.log(checkXML.msg);
-        }
-      } else {
-        console.log(checkXML_1.default(_this.editText).msg);
-      } // @ts-ignore
-
-
-      var fragment = document.createDocumentFragment();
-      fragment.appendChild(jquery_1.default(_this.editText)[0]);
-      var nodes = null;
-      nodes = fragment.firstElementChild;
-      nodes.setAttribute("height", String(index_1.svgInfo.width));
-      nodes.setAttribute("width", String(index_1.svgInfo.height));
-      var vdom = utils_1.deepKeyValue(nodes);
-      index_1.svgInfo.svg.html(fragment);
-      var rectTips = createSVG_1.default.createSVG('rect', {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        stroke: '#89cff0',
-        opacity: "0.5",
-        id: 'rect-tip',
-        'stroke-width': 2,
-        fill: '#89cff0'
-      });
-      jquery_1.default("#graph-svg").append(rectTips);
-      showDom.html(utils_1.createElementByVdom(vdom)); // edit&&(edit.innerHTML = editHtml)
-    };
-
-    this.edit = edit;
-    this.bindInputChange();
-  }
-
-  return EditArea;
-}();
-
-exports.default = EditArea;
-},{"jquery":"../node_modules/jquery/dist/jquery.js","../utils/utils":"utils/utils.ts","../utils/checkXML":"utils/checkXML.ts","../utils/createSVG":"utils/createSVG.ts","./singleTip":"js/singleTip.ts","../index":"index.ts"}],"config.ts":[function(require,module,exports) {
+},{"../utils/utils":"utils/utils.ts"}],"config.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.checkInter = exports.debounce = exports.getProps = exports.toCheckProps = void 0;
+exports.checkInter = exports.debounce = exports.getProps = exports.toCheckProps = exports.doubleTag = exports.singleTag = void 0;
 var fixedProps = ["id", "class", "style", "transform", "stroke", "stroke-width", "fill"];
+exports.singleTag = ["path", "line", "rect", "circle", "ellipse", "polyline", "polygon"];
+exports.doubleTag = ["svg", "text", "g"];
 var propsStrate = {
   svg: ["x", "y", "width", "height", "viewBox"],
   text: ["x", "y", "width", "height", "font-family", "font-size"],
@@ -11839,7 +11719,213 @@ function checkInter(str, val) {
 }
 
 exports.checkInter = checkInter;
-},{}],"js/domTree.ts":[function(require,module,exports) {
+},{}],"js/editArea.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+}); //匹配标签
+
+var jquery_1 = __importDefault(require("jquery"));
+
+var utils_1 = require("../utils/utils");
+
+var checkXML_1 = __importDefault(require("../utils/checkXML"));
+
+var createSVG_1 = __importDefault(require("../utils/createSVG"));
+
+var singleTip_1 = require("./singleTip");
+
+var index_1 = require("../index");
+
+var config_1 = require("../config");
+
+var checkSvgTag = /(?<=<)[a-z]+(?=[>| ])/g; //匹配标签
+
+var matchSvg = /<[a-z]+([\s\S]*?) *?>|<!--([\s\S]*?)-->/g; //匹配svg
+
+var matchSvgTag = /<svg([\s\S]*?)<\/svg>/g;
+var matchTag = /<(\S*?)[^>]*>.*?|<.*? \/>/g;
+var matchUpper = /[A-Z]/;
+
+var EditArea =
+/** @class */
+function () {
+  function EditArea(edit) {
+    var _this = this;
+
+    this.edit = edit;
+    this.editText = "";
+    this.editHtml = "";
+
+    this.bindInputChange = function () {
+      _this.edit.on('input', _this.inputChangeHandler);
+    };
+
+    this.inputChangeHandler = function (event) {
+      if (event.target) {
+        _this.editText = event.target.innerText.trim();
+        _this.editHtml = event.target.innerHTML;
+      }
+
+      if (_this.editText.length == 0) return;
+      _this.editText = _this.editText.replace(/\n/, " ");
+      _this.editText = _this.editText.replace(/\n/gm, " ");
+      _this.editText = _this.editText.replace(/\s+/g, " ").replace(/(?<=>) *(?=<)/g, "\n        ");
+      var svgArr = _this.editText.match(matchSvgTag) == null ? [] : _this.editText.match(matchSvgTag);
+      var svgArrTag = _this.editText.match(matchSvg) == null ? [] : _this.editText.match(matchSvg);
+
+      var tagNameArr = _this.editText.match(checkSvgTag);
+
+      var tagArr = _this.editText.match(matchTag);
+
+      var svgTagArr = [];
+      var ret = matchTag.exec(_this.editText);
+      if (ret == null) return singleTip_1.singleTip("请输入正确的svg字符串", "error");
+      var regTag = /(?<=<)[a-z]+(?= +)|[a-z]+(?=>)/g;
+      var matchTagAll = [];
+      var inputSingleTag = new Set();
+      var inputDobuleTag = new Set();
+      var illegalTag = new Set();
+
+      while (ret) {
+        var retMatch = ret[0].match(regTag);
+
+        if (retMatch == null) {
+          ret = matchTag.exec(_this.editText);
+          continue;
+        }
+
+        matchTagAll.push(retMatch[0]);
+
+        if (config_1.singleTag.indexOf(retMatch[0]) !== -1) {
+          inputSingleTag.add(retMatch[0]);
+        } else if (config_1.doubleTag.indexOf(retMatch[0]) !== -1) {
+          inputDobuleTag.add(retMatch[0]);
+        } else {
+          illegalTag.add(retMatch[0]);
+        }
+
+        ret = matchTag.exec(_this.editText);
+      }
+
+      if (illegalTag.size > 0) {
+        singleTip_1.singleTip(Array.from(illegalTag).join(", ") + " is not an svg tag", "wraning");
+      }
+
+      var startTagArr = [];
+      var endTagArr = [];
+      var reg = /(?<=<)[a-z]+(?= +)/g;
+      console.log(matchTagAll);
+      console.log(_this.editText);
+      if (matchTagAll[0] !== "svg") return singleTip_1.singleTip("root标签必须是svg", "error"); // let len: number = matchTagAll.length
+      // for (let i = 0; i < len; i++) {
+      //     let value = matchTagAll[i]
+      //     if (value.startsWith("/")) {
+      //         endTagArr.push(value)
+      //     } else {
+      //         startTagArr.push(value)
+      //     }
+      // }
+      // let startLen = startTagArr.length
+      // let copyArr = startTagArr.slice()
+      // for (let i = 0; i < startLen; i++) {
+      //     if (inputSingleTag.has(startTagArr[i])) {
+      //         copyArr.shift()
+      //         continue
+      //     }
+      //     if (inputDobuleTag.has(startTagArr[i]) && ("/" + copyArr.shift() == endTagArr.pop())) {
+      //
+      //     } else {
+      //         return singleTip(startTagArr[i] + " is not closing properly", "error")
+      //     }
+      // }
+
+      var showDom = jquery_1.default("#dom-show");
+      var checkXML = checkXML_1.default(_this.editText);
+      var errorFlag = false;
+
+      if (checkXML.error_code == 1) {
+        if (checkXML.msg.indexOf("mismatch") > -1) {
+          errorFlag = true; //error on line 3 at column 10: Opening and ending tag mismatch: svg1 line 0 and svg
+
+          console.log("标签不匹配");
+          console.log(checkXML.msg, "error");
+          singleTip_1.singleTip(checkXML.msg);
+        } else if (checkXML.msg.indexOf("attributes") > -1) {
+          errorFlag = true;
+          singleTip_1.singleTip(checkXML.msg, "error");
+          console.log("属性不正确");
+        } else if (checkXML.msg.indexOf("attribute") > -1) {
+          errorFlag = true;
+          singleTip_1.singleTip(checkXML.msg, "error");
+          console.log("错误解析属性名 circle cx");
+        } else if (checkXML.msg.indexOf("&gt") > -1) {
+          errorFlag = true;
+          singleTip_1.singleTip(checkXML.msg, "error");
+          console.log("标签未正确闭合empty");
+        } else if (checkXML.msg.indexOf("empty") > -1) {
+          errorFlag = true;
+          singleTip_1.singleTip(checkXML.msg, "error");
+          console.log("请输入正确的svg标签");
+        } else {
+          console.log(checkXML.msg);
+          errorFlag = true;
+          singleTip_1.singleTip(checkXML.msg, "error");
+        }
+      } else {
+        console.log(checkXML_1.default(_this.editText).msg);
+        singleTip_1.singleTip(checkXML.msg, "success");
+      } // @ts-ignore
+
+
+      var fragment = document.createDocumentFragment();
+
+      if (errorFlag) {
+        index_1.svgInfo.svg.html();
+        showDom.html();
+        jquery_1.default("#graph-svg").html();
+        console.log(888);
+        return;
+      }
+
+      fragment.appendChild(jquery_1.default(_this.editText)[0]);
+      var nodes = null;
+      nodes = fragment.firstElementChild;
+      nodes.setAttribute("height", String(index_1.svgInfo.width));
+      nodes.setAttribute("width", String(index_1.svgInfo.height));
+      var vDom = utils_1.deepKeyValue(nodes);
+      index_1.svgInfo.svg.html(fragment);
+      var rectTips = createSVG_1.default.createSVG('rect', {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        stroke: '#89cff0',
+        opacity: "0.5",
+        id: 'rect-tip',
+        'stroke-width': 2,
+        fill: '#89cff0'
+      });
+      jquery_1.default("#graph-svg").append(rectTips);
+      showDom.html(utils_1.createElementByVdom(vDom));
+    };
+
+    this.edit = edit;
+    this.bindInputChange();
+  }
+
+  return EditArea;
+}();
+
+exports.default = EditArea;
+},{"jquery":"../node_modules/jquery/dist/jquery.js","../utils/utils":"utils/utils.ts","../utils/checkXML":"utils/checkXML.ts","../utils/createSVG":"utils/createSVG.ts","./singleTip":"js/singleTip.ts","../index":"index.ts","../config":"config.ts"}],"js/domTree.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -11868,6 +11954,12 @@ function () {
 
     this.domView = domView;
     /**
+     * 上一个选择的标签
+     * @private prev
+     */
+
+    this.prev = null;
+    /**
      * 判断DOM区域是否选择dom
      */
 
@@ -11894,10 +11986,9 @@ function () {
         left: _x + "px",
         top: _y + "px"
       });
-      console.log('comtextmenu');
     };
 
-    this.domViewClickHandler = function (event) {
+    this.domViewClickHandler = function () {
       if (_this.getPrev() != null) {
         _this.getPrev().removeClass("select-dom");
 
@@ -11936,8 +12027,8 @@ function () {
     };
 
     this.showWrapClickHandler = function (event) {
-      var target = jquery_1.default(event.currentTarget);
       event.stopImmediatePropagation();
+      var target = jquery_1.default(event.currentTarget);
 
       if (_this.prev != null) {
         _this.prev.toggleClass("select-dom");
@@ -11945,8 +12036,9 @@ function () {
 
       target.toggleClass("select-dom");
       var uid = target.attr("data-uid");
-      jquery_1.default("#add-btn").attr("data-uid", uid);
-      jquery_1.default("#add-btn").addClass("text-node");
+      var addBtn = jquery_1.default("#add-btn");
+      addBtn.attr("data-uid", uid);
+      addBtn.addClass("text-node");
       var selMark = jquery_1.default("#" + uid);
 
       if (selMark[0]) {
@@ -11955,7 +12047,7 @@ function () {
         var tagArr = [];
 
         if (target.hasClass("text-node")) {
-          tagArr = ["content"];
+          tagArr.push("content");
         } else {
           tagArr = Array.from(new Set(config_1.getProps(tag).concat(propsArr)));
         } //固定属性加特有属性
@@ -11963,7 +12055,7 @@ function () {
 
         var attrHtml_1 = '';
         tagArr.forEach(function (item) {
-          if (item.trim() !== '') {
+          if (item && item.trim() !== '') {
             var value = selMark.attr(item) != null ? selMark.attr(item) : "";
             value = value == undefined ? "" : value;
             value = item == "content" ? target.text() : value;
@@ -11973,12 +12065,24 @@ function () {
           }
         });
         jquery_1.default("#attr-wrap").html(attrHtml_1);
-        var currentRect = selMark[0].getBoundingClientRect();
-        var percentRect = jquery_1.default("#graph-svg")[0].getBoundingClientRect();
-        var x = 0;
-        var y = 0;
-        var setX = 0;
-        var setY = 0;
+        var svg = jquery_1.default("#graph-svg");
+        var currentRect = selMark.get(0).getBoundingClientRect();
+        var percentRect = svg.get(0).getBoundingClientRect();
+        var x = void 0,
+            y = void 0,
+            setX = void 0,
+            setY = void 0,
+            dargX = 0,
+            dargY = 0;
+        var viewBox = svg.attr("viewBox");
+        var tmp = [0, 0, 0, 0];
+
+        if (viewBox != null) {
+          tmp = viewBox.split(',').map(Number);
+          dargX = tmp[0];
+          dargY = tmp[1];
+        }
+
         var scale = Math.ceil((index_1.svgInfo.getScale() - 1) * 100000) / 100000;
         var offsetX = currentRect.x - percentRect.x;
         var offsetY = currentRect.y - percentRect.y; //放大
@@ -11998,23 +12102,18 @@ function () {
 
         var width = currentRect.width;
         var height = currentRect.height;
-        jquery_1.default("#rect-tip").attr({
-          x: offsetX - setX,
-          y: offsetY - setY,
+        var rectTip = jquery_1.default("#rect-tip");
+        rectTip.attr({
+          x: offsetX - setX + dargX,
+          y: offsetY - setY + dargY,
           width: width - x,
           height: height - y
         });
-        jquery_1.default("#rect-tip").css("display", "block");
+        rectTip.css("display", "block");
       }
 
       _this.prev = target;
-
-      if (_this.prev != null && _this.prev.hasClass("select-dom")) {
-        _this.selectDomFlag = true;
-      } else {
-        _this.selectDomFlag = false;
-      }
-
+      _this.selectDomFlag = target.hasClass("select-dom");
       var oMenu = jquery_1.default("#menu");
 
       if (oMenu.css("display") == "block") {
@@ -12026,7 +12125,7 @@ function () {
 
     this.domView = domView;
     this.bindIconClick();
-    this.bindshowWrapClick();
+    this.bindShowWrapClick();
     this.bindDomViewClick();
     this.bindDomViewContextmenu();
   }
@@ -12067,7 +12166,7 @@ function () {
     this.domView.on('click', '.icon', this.iconClickHandler);
   };
 
-  DomTree.prototype.bindshowWrapClick = function () {
+  DomTree.prototype.bindShowWrapClick = function () {
     this.domView.on('click', '.show-wrapper', this.showWrapClickHandler);
   };
 
@@ -12237,29 +12336,42 @@ var singleTip_1 = require("./singleTip");
  */
 
 
-var AtrrArea =
+var AttrArea =
 /** @class */
 function () {
-  function AtrrArea(atrrArea) {
-    this.atrrArea = atrrArea;
+  function AttrArea(attrArea) {
+    var _this = this;
+
+    this.attrArea = attrArea;
+    this.cacheText = '';
+    this.cacheId = '';
 
     this.inputChangeHandler = function (event) {
       var target = jquery_1.default(event.target);
       var id = target.attr('id');
-      var propsValue = target.val();
+      var propsValue = target.val().trim();
 
       if (id != null) {
         var uid = id.split('_');
 
+        if (propsValue.length == 0) {
+          _this.cacheText = '';
+          return;
+        }
+
+        console.log();
+
         if (uid[1] && !config_1.checkInter(uid[1], propsValue)) {
-          singleTip_1.singleTip("请输入有效的数值");
+          singleTip_1.singleTip("请输入有效的数值", "error");
+          target.val(_this.cacheId === id ? _this.cacheText : "");
+          _this.cacheId = id;
           return;
         }
 
         if (uid[1] == "content") {
-          console.log("文本");
           jquery_1.default("#dom-" + uid[0]).children(".text-node").text(propsValue);
           jquery_1.default("#" + uid[0]).html(propsValue);
+          _this.cacheText = propsValue;
           return;
         }
 
@@ -12284,6 +12396,9 @@ function () {
         } else {
           nameProps.children(".name-" + uid[1]).next().text(propsValue);
         }
+
+        _this.cacheText = propsValue;
+        _this.cacheId = id;
       }
     };
 
@@ -12309,23 +12424,23 @@ function () {
       $target.parent().remove();
     };
 
-    this.atrrArea = atrrArea;
+    this.attrArea = attrArea;
     this.bindDeleteBtnClick();
     this.bindInputChange();
   }
 
-  AtrrArea.prototype.bindDeleteBtnClick = function () {
-    this.atrrArea.on('click', '.delete-btn', this.deleteBtnClickHandler);
+  AttrArea.prototype.bindDeleteBtnClick = function () {
+    this.attrArea.on('click', '.delete-btn', this.deleteBtnClickHandler);
   };
 
-  AtrrArea.prototype.bindInputChange = function () {
-    this.atrrArea.on('input', 'input', this.inputChangeHandler);
+  AttrArea.prototype.bindInputChange = function () {
+    this.attrArea.on('input', 'input', this.inputChangeHandler);
   };
 
-  return AtrrArea;
+  return AttrArea;
 }();
 
-exports.default = AtrrArea;
+exports.default = AttrArea;
 },{"jquery":"../node_modules/jquery/dist/jquery.js","../config":"config.ts","./singleTip":"js/singleTip.ts"}],"js/addBtn.ts":[function(require,module,exports) {
 "use strict";
 
@@ -12362,11 +12477,6 @@ function () {
       var props = jquery_1.default("#add-props").val();
       var propsValue = jquery_1.default("#add-value").val();
 
-      if (jquery_1.default(event.currentTarget).hasClass("text-node")) {
-        singleTip_1.singleTip("文本节点不能添加属性", "error");
-        return;
-      }
-
       if (!uid) {
         singleTip_1.singleTip("所选内容为空", "error");
         return;
@@ -12374,6 +12484,11 @@ function () {
 
       if (!props || !propsValue) {
         singleTip_1.singleTip("属性名或属性值为空", "error");
+        return;
+      }
+
+      if (jquery_1.default(event.currentTarget).hasClass("text-node")) {
+        singleTip_1.singleTip("文本节点不能添加属性", "error");
         return;
       }
 
@@ -12451,10 +12566,9 @@ var addBtn_1 = __importDefault(require("./js/addBtn"));
 
 exports.svgInfo = new svgInfo_1.default(jquery_1.default('#graph').width() || 500, jquery_1.default('#graph').height() || 500, jquery_1.default('#graph-svg'));
 exports.domTree = new domTree_1.default(jquery_1.default("#dom-view"));
-var isChildTag = ["svg", 'g', 'text'];
 var editArea = new editArea_1.default(jquery_1.default('#edit'));
 var selMenu = new selMenu_1.default(jquery_1.default("#dom-view"));
-var atrrArea = new attrArea_1.default(jquery_1.default("#attr-wrap"));
+var attrArea = new attrArea_1.default(jquery_1.default("#attr-wrap"));
 var addBtn = new addBtn_1.default(jquery_1.default("#add-btn"));
 var circle = createSVG_1.default.createSVG('circle', {
   cx: 100,
@@ -12492,7 +12606,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50552" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51997" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

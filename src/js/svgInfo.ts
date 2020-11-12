@@ -3,8 +3,8 @@ import MouseMoveEvent = JQuery.MouseMoveEvent;
 import MouseDownEvent = JQuery.MouseDownEvent;
 
 class SvgInfo {
-    public width:number=0;
-    public height:number=0;
+    public width: number = 0;
+    public height: number = 0;
     public clientWidth = document.documentElement.clientWidth
     public clientHeight = document.documentElement.clientHeight
     public scrollIndex: number = 0
@@ -14,7 +14,7 @@ class SvgInfo {
     public startX: number = 0
     public startY: number = 0
 
-    constructor(width: number, height: number, public svg: any) {
+    constructor(width: number, height: number, public svg: JQuery) {
         this.width = width;
         this.height = height;
         this.svg = svg;
@@ -61,18 +61,18 @@ class SvgInfo {
             this.svg.removeAttr("viewBox")
             return
         }
-        let viewBox: string = ''
+        let viewBox: string;
         let tmp: number[] = [0, 0, 0, 0];
-        let str: string | null = this.svg.attr("viewBox")
+        let str: string | undefined = this.svg.attr("viewBox")
         if (str != null) {
             tmp = str.split(',').map(Number)
             viewBox = `${tmp[0]},${tmp[1]},`
         } else {
             viewBox = this.viewBox
         }
-        let w = (Number(this.svg.width()) + width).toFixed(6)
-        let h = (Number(this.svg.height()) + height).toFixed(6)
-        let scale = Number((Number(this.svg.width()) / Number(w)).toFixed(2))
+        let w: string = (Number(this.svg.width()) + width).toFixed(6)
+        let h: string = (Number(this.svg.height()) + height).toFixed(6)
+        let scale: number = Number((Number(this.svg.width()) / Number(w)).toFixed(2))
         this.setScale(scale)
         this.svg.attr("viewBox", `${viewBox}${w}, ${h}`)
     }
@@ -113,8 +113,6 @@ class SvgInfo {
     mousedownHandler = (event: MouseDownEvent): void => {
         this.startX = event.pageX
         this.startY = event.pageY
-        let target = event.target
-        let offset = $(target).offset()
         $(document).on('mousemove', this.mousemoveHandler)
     }
     /**
@@ -127,7 +125,7 @@ class SvgInfo {
     mousemoveHandler = (event: MouseMoveEvent) => {
         let translateX: number = event.pageX - this.startX
         let translateY: number = event.pageY - this.startY
-        let str: string = this.svg.attr("viewBox")
+        let str: string | undefined = this.svg.attr("viewBox")
         let tmp: number[] = [0, 0, 0, 0];
         if (str != null) {
             tmp = str.split(',').map(Number)

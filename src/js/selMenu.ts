@@ -31,6 +31,7 @@ class SelMenu {
             this.copyNode.attr("id", "dom-" + id)
             this.copyNode.removeClass("select-dom")
         }
+
         switch (type) {
             case "remove-node":
                 domTree.getSelectDom().remove()

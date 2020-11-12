@@ -10,7 +10,7 @@ class DomTree {
      * 上一个选择的标签
      * @private prev
      */
-    private prev: any;
+    private prev: JQuery | null = null;
     /**
      * 判断DOM区域是否选择dom
      */
@@ -19,12 +19,12 @@ class DomTree {
      * 当前选择的标签
      * @private selectDom
      */
-    private selectDom: any = null;
+    private selectDom: JQuery | null = null
 
     constructor(private domView: any) {
         this.domView = domView
         this.bindIconClick()
-        this.bindshowWrapClick()
+        this.bindShowWrapClick()
         this.bindDomViewClick()
         this.bindDomViewContextmenu()
     }
@@ -66,7 +66,7 @@ class DomTree {
         this.domView.on('click', '.icon', this.iconClickHandler)
     }
 
-    bindshowWrapClick() {
+    bindShowWrapClick() {
         this.domView.on('click', '.show-wrapper', this.showWrapClickHandler)
     }
 
@@ -83,30 +83,26 @@ class DomTree {
             left: _x + "px",
             top: _y + "px"
         })
-        console.log('comtextmenu')
     }
 
-    domViewClickHandler = (event: ClickEvent) => {
+    domViewClickHandler = () => {
         if (this.getPrev() != null) {
             this.getPrev().removeClass("select-dom")
             this.setPrev(null)
         }
-        let oMenu = $("#menu")
-        let menuChild = $("#child-menu")
+        let oMenu: JQuery = $("#menu")
+        let menuChild: JQuery = $("#child-menu")
         if (oMenu.css("display") == "block") {
-            oMenu.css({
-                display: "none"
-            })
+            oMenu.css({display: "none"})
         }
-        menuChild.css({
-            display: "none"
-        })
+        menuChild.css({display: "none"})
         $("#rect-tip").css("display", "none");
         this.setSelectDom(null)
     }
     iconClickHandler = (event: ClickEvent) => {
         event.stopPropagation();
-        let $target = $(event.target)
+        let $target: JQuery = $(event.target)
+
         $target.parent().toggleClass("show-active")
         if ($target.hasClass("icon-xiajiantou")) {
             $target.removeClass("icon-xiajiantou")
@@ -117,25 +113,23 @@ class DomTree {
         }
     }
     showWrapClickHandler = (event: ClickEvent) => {
-        let target = $(event.currentTarget)
         event.stopImmediatePropagation()
+        let target: JQuery = $(event.currentTarget)
         if (this.prev != null) {
             this.prev.toggleClass("select-dom")
         }
         target.toggleClass("select-dom")
-
         let uid: string = target.attr("data-uid") as string
-
-
-        $("#add-btn").attr("data-uid", uid)
-        $("#add-btn").addClass("text-node")
-        let selMark = $("#" + uid)
+        let addBtn: JQuery = $("#add-btn")
+        addBtn.attr("data-uid", uid)
+        addBtn.addClass("text-node")
+        let selMark: JQuery = $("#" + uid)
         if (selMark[0]) {
-            let propsArr = selMark.get(0).getAttributeNames()
+            let propsArr: string[] = selMark.get(0).getAttributeNames()
             let tag: string = selMark.get(0).tagName
             let tagArr: string[] = [];
             if (target.hasClass("text-node")) {
-                tagArr = ["content"]
+                tagArr.push("content")
 
             } else {
                 tagArr = Array.from(new Set(getProps(tag as SVG_TAG).concat(propsArr)))
@@ -144,26 +138,37 @@ class DomTree {
 
             let attrHtml = ''
             tagArr.forEach((item: string) => {
-                if (item.trim() !== '') {
-                    let value = selMark.attr(item) != null ? selMark.attr(item) : ""
+                if (item && item.trim() !== '') {
+                    let value: string | undefined = selMark.attr(item) != null ? selMark.attr(item) : ""
                     value = value == undefined ? "" : value
                     value = item == "content" ? target.text() : value
                     let placeholder = selMark.attr(item) ? "请输入内容" : "未指定"
                     let inputId = uid + "_" + item
                     attrHtml += createPropsAndValue(item, value, uid, inputId, placeholder)
                 }
-
             })
             $("#attr-wrap").html(attrHtml)
-            let currentRect = selMark[0].getBoundingClientRect()
-            let percentRect = $("#graph-svg")[0].getBoundingClientRect()
-            let x: number = 0
-            let y: number = 0
-            let setX: number = 0
-            let setY: number = 0
-            let scale = Math.ceil(((svgInfo.getScale() - 1) * 100000)) / 100000
-            let offsetX = currentRect.x - percentRect.x
-            let offsetY = currentRect.y - percentRect.y
+            let svg: JQuery = $("#graph-svg")
+            let currentRect = selMark.get(0).getBoundingClientRect()
+            let percentRect = svg.get(0).getBoundingClientRect()
+            let x: number,
+                y: number,
+                setX: number,
+                setY: number,
+                dargX: number = 0,
+                dargY: number = 0
+            let viewBox: string | undefined = svg.attr("viewBox")
+            let tmp: number[] = [0, 0, 0, 0];
+            if (viewBox != null) {
+                tmp = viewBox.split(',').map(Number)
+                dargX = tmp[0]
+                dargY = tmp[1]
+            }
+
+
+            let scale: number = Math.ceil(((svgInfo.getScale() - 1) * 100000)) / 100000
+            let offsetX: number = currentRect.x - percentRect.x
+            let offsetY: number = currentRect.y - percentRect.y
             //放大
             if (scale > 0) {
                 x = scale * (currentRect.width / (1 + scale))
@@ -179,23 +184,19 @@ class DomTree {
             }
             let width = currentRect.width
             let height = currentRect.height
-
-            $("#rect-tip").attr({
-                x: offsetX - setX,
-                y: offsetY - setY,
+            let rectTip: JQuery = $("#rect-tip")
+            rectTip.attr({
+                x: offsetX - setX + dargX,
+                y: offsetY - setY + dargY,
                 width: width - x,
                 height: height - y
             })
-            $("#rect-tip").css("display", "block");
+            rectTip.css("display", "block");
         }
 
         this.prev = target
-        if (this.prev != null && this.prev.hasClass("select-dom")) {
-            this.selectDomFlag = true
-        } else {
-            this.selectDomFlag = false
-        }
-        let oMenu = $("#menu")
+        this.selectDomFlag = target.hasClass("select-dom")
+        let oMenu: JQuery = $("#menu")
         if (oMenu.css("display") == "block") {
             oMenu.css({
                 display: "none"

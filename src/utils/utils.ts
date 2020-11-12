@@ -1,4 +1,4 @@
-type TipType = "error" | "success" | "wraning"
+type TipType = "error" | "success" | "wraning" | "default"
 export let doubleTag: string[] = ["svg", "g", "text"]
 export let svgType: string[] = ["svg", "g", "path", "text", "line", "rect", "ellipse", "circle", "polyline", "polygon"]
 
@@ -14,17 +14,19 @@ function getElementToPageLeft(el: any, key: string) {
 }
 
 
-interface Nullable {
+function Nullable() {
 
 }
+
+
 
 export function createSingleTips() {
     let instance: HTMLDivElement;
     let clear: number | null;
-    return function (text: string, type?: TipType) {
-        let color: string = "#409eff"
+    return function (text: string, type: TipType = "default") {
+        let color: string = ""
         switch (type) {
-            case undefined:
+            case "default":
                 color = "#409eff"
                 break;
             case "success":
@@ -70,7 +72,7 @@ export function createSingleTips() {
             instance && (instance.style.display = 'none')
             clear && clearTimeout(clear)
             clear = null
-        }, 2000)
+        }, 5000)
 
     }
 
@@ -87,10 +89,10 @@ export function createElementByVdom(vdom: IVDomNode) {
     if (isText && len == 0) {
         return ''
     }
-    let isDobuleTag = doubleTag.indexOf(vdom.tag as string) != -1
+    let isDobuleTag: boolean = doubleTag.indexOf(vdom.tag as string) != -1
     let str = '';
     // @ts-ignore
-    Object.entries(vdom.props).forEach((item) => {
+    Object.entries(vdom.props).forEach((item: string[]) => {
         if (item[0] !== "data-uid" && item[0].trim()) {
             str += `<span class="wrap-${item[0]}"><span class="props name-${item[0]}">${item[0]}</span>=<span class="props-value">${item[1]}</span></span>`
         }
@@ -104,9 +106,8 @@ export function createElementByVdom(vdom: IVDomNode) {
      ${isText == true ? `<div data-uid=${vdom.props['data-uid']} class="text-node show-wrapper tree-children">${vdom.children}</div>` :
         (len > 0 ? `<div class="tree-children">${createElemTextByVdom(vdom.children as [])}</div>` : '')
     }
-
     ${len == 0 ? "" : '<span class="hiddle">...</span>'}
-   ${isDobuleTag ? `<span class=${len == 0 ? "foot-one" : "foot"}>${vdom.tag}</span>` : ''}
+    ${isDobuleTag ? `<span class=${len == 0 ? "foot-one" : "foot"}>${vdom.tag}</span>` : ''}
     </div>
     `
 

@@ -8,7 +8,7 @@ import {createPropsAndValue} from "../utils/utils";
  * 添加属性按钮
  */
 class AddBtn {
-    constructor(public addBtn: any) {
+    constructor(public addBtn: JQuery) {
         this.addBtn = addBtn
         this.bindAddBtnClick()
     }
@@ -18,13 +18,10 @@ class AddBtn {
     }
 
     addBtnClickHandler = (event: ClickEvent) => {
-        let uid = $(event.currentTarget).attr("data-uid")
-        let props = $("#add-props").val() as string
-        let propsValue = $("#add-value").val() as string
-        if ($(event.currentTarget).hasClass("text-node")) {
-            singleTip("文本节点不能添加属性", "error")
-            return
-        }
+        let uid: string | undefined = $(event.currentTarget).attr("data-uid")
+        let props: string = $("#add-props").val() as string
+        let propsValue: string = $("#add-value").val() as string
+
         if (!uid) {
             singleTip("所选内容为空", "error")
             return
@@ -33,20 +30,23 @@ class AddBtn {
             singleTip("属性名或属性值为空", "error")
             return
         }
-
-        let domGraph = $("#" + uid)
-        let tag = domGraph.get(0).tagName
-        let propsArr = domGraph.get(0).getAttributeNames()
-        let tagArr = Array.from(new Set(getProps(tag as SVG_TAG).concat(propsArr)))
+        if ($(event.currentTarget).hasClass("text-node")) {
+            singleTip("文本节点不能添加属性", "error")
+            return
+        }
+        let domGraph: JQuery = $("#" + uid)
+        let tag: string = domGraph.get(0).tagName
+        let propsArr: string[] = domGraph.get(0).getAttributeNames()
+        let tagArr: string[] = Array.from(new Set(getProps(tag as SVG_TAG).concat(propsArr)))
         if (tagArr.indexOf(props) !== -1) {
             singleTip("属性名不能重复")
             return
         }
         domGraph.attr(props, propsValue)
-        let domView = $("#dom-" + uid)
-        let propsWrap = domView.children(".head-wrap")
+        let domView: JQuery = $("#dom-" + uid)
+        let propsWrap: JQuery = domView.children(".head-wrap")
             .children(".props-wrap")
-        let nameProps = propsWrap.children(".wrap-" + props)
+        let nameProps: JQuery = propsWrap.children(".wrap-" + props)
         if (propsValue == '' && nameProps.length !== 0) {
             return nameProps.remove()
         }
@@ -55,8 +55,8 @@ class AddBtn {
         } else {
             nameProps.children(".name-" + props).next().text(propsValue)
         }
-        let inputId = uid + "_" + props
-        let attrHtml = createPropsAndValue(props, propsValue, uid, inputId)
+        let inputId: string = uid + "_" + props
+        let attrHtml: string = createPropsAndValue(props, propsValue, uid, inputId)
 
         $("#attr-wrap").append(attrHtml)
 
