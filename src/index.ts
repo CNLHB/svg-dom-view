@@ -6,6 +6,7 @@ import SelMenu from './js/selMenu'
 import AttrArea from "./js/attrArea";
 import AddBtn from "./js/addBtn";
 
+
 export let svgInfo: SvgInfo = new SvgInfo($('#graph').width() || 500, $('#graph').height() || 500, $('#graph-svg'))
 let domView: JQuery = $("#dom-view")
 export let domTree: DomTree = new DomTree(domView)

@@ -3,6 +3,7 @@ import $ from "jquery";
 import {singleTip} from "./singleTip";
 import {doubleTag} from "../utils/utils";
 import {domTree} from '../index'
+import {singleTag} from "../config";
 
 /**
  * 创建dom Tree menu
@@ -26,11 +27,14 @@ class SelMenu {
         let oMenu: JQuery = $("#menu")
         let cloneSvg: JQuery = $();
         let selectSvg: JQuery = $();
+        let flagText = false
         if (type !== "paste-node" && type?.startsWith("paste")) {
             let copyUId = domTree.getSelectDom().attr("data-uid")
             let id = copyUId + Math.ceil(Math.random() * 1000)
+            //svg标签
             selectSvg = $("#" + copyUId)
             if (selectSvg.get(0).tagName == 'text') {
+                flagText = true
                 selectSvg.html(selectSvg.html() + `
                 ${selectSvg.html()}
                 `)
@@ -38,7 +42,9 @@ class SelMenu {
                 cloneSvg = selectSvg.clone(true);
                 cloneSvg.attr("id", id)
             }
-            if (this.copyNode!=null){
+
+            // "text-node"
+            if (this.copyNode != null) {
                 this.copyNode.attr("data-uid", id)
                 this.copyNode.attr("id", "dom-" + id)
                 this.copyNode.removeClass("select-dom")
@@ -48,11 +54,19 @@ class SelMenu {
 
         switch (type) {
             case "remove-node":
-                domTree.getSelectDom().remove()
-                $("#" + domTree.getSelectDom().attr("data-uid")).remove()
-                $("#svg-tip").remove()
-                $("#rect-tip").remove()
 
+                if ($("#graph-svg").get(0) == $("#" + domTree.getSelectDom().attr("data-uid")).parent().get(0)) {
+                    $("#svg-tip").remove()
+                }
+                if (domTree.getSelectDom().hasClass("text-node")) {
+                    domTree.getSelectDom().parent().remove()
+                } else {
+                    domTree.getSelectDom().remove()
+                }
+
+                $("#" + domTree.getSelectDom().attr("data-uid")).remove()
+
+                $("#rect-tip").css("display", "none")
                 oMenu.css({
                     display: "none"
                 })
@@ -104,9 +118,14 @@ class SelMenu {
                 oMenu.css("display", "none");
                 let tag = selectSvg.get(0).tagName;
                 if (doubleTag.indexOf(tag) !== -1) {
-                    selectSvg.append(cloneSvg)
-                    domTree.getSelectDom().append(this.copyNode)
-                    singleTip("粘贴节点成功")
+                    if (flagText&&this.copyNode?.hasClass("text-node")){
+                        singleTip("文本节点没有子节点", "error")
+                    }else{
+                        selectSvg.append(cloneSvg)
+                        domTree.getSelectDom().append(this.copyNode)
+                        singleTip("粘贴节点成功","success")
+                    }
+
                 } else {
                     singleTip("所选节点没有子节点", "error")
                 }

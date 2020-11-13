@@ -8,10 +8,6 @@ import {svgInfo} from "../index";
 import {doubleTag, singleTag} from "../config";
 import {attrArea} from '../index'
 
-let checkSvgTag: RegExp = /(?<=<)[a-z]+(?=[>| ])/g;
-//匹配标签
-let matchSvg: RegExp = /<[a-z]+([\s\S]*?) *?>|<!--([\s\S]*?)-->/g;
-let matchUpper: RegExp = /[A-Z]/g
 
 //匹配Tag
 let matchTag: RegExp = /<(\S*?)[^>]*>.*?|<.*? \/>/g;
@@ -50,6 +46,9 @@ class EditArea {
         let inputSingleTag: Set<string> = new Set<string>()
         let inputDobuleTag: Set<string> = new Set<string>()
         let illegalTag: Set<string> = new Set<string>()
+        /**
+         * 循环遍历标签
+         */
         while (ret) {
             let retMatch = ret[0].match(regTag)
             if (retMatch == null) {
@@ -73,27 +72,20 @@ class EditArea {
         if (checkXML.error_code == 1) {
             if (checkXML.msg.indexOf("mismatch") > -1) {
                 errorFlag = true
-                console.log("标签不匹配")
-                console.log(checkXML.msg, "error")
                 singleTip(checkXML.msg)
             } else if (checkXML.msg.indexOf("attributes") > -1) {
                 errorFlag = true
                 singleTip(checkXML.msg, "error")
-                console.log("属性不正确")
             } else if (checkXML.msg.indexOf("attribute") > -1) {
                 errorFlag = true
                 singleTip(checkXML.msg, "error")
-                console.log("错误解析属性名 circle cx")
             } else if (checkXML.msg.indexOf("&gt") > -1) {
                 errorFlag = true
                 singleTip(checkXML.msg, "error")
-                console.log("标签未正确闭合empty")
             } else if (checkXML.msg.indexOf("empty") > -1) {
                 errorFlag = true
                 singleTip(checkXML.msg, "error")
-                console.log("请输入正确的svg标签")
             } else {
-                console.log(checkXML.msg)
                 errorFlag = true
                 singleTip(checkXML.msg, "error")
             }
@@ -112,6 +104,7 @@ class EditArea {
             svgInfo.svg.html()
             showDom.html()
             $("#graph-svg").html()
+            attrArea.getAttrArea().html(null)
             return
         }
         fragment.appendChild($(this.editText)[0])
@@ -121,7 +114,6 @@ class EditArea {
         let vDom = deepKeyValue(nodes)
         svgInfo.svg.html(fragment)
         let rect = nodes.getBoundingClientRect()
-        console.log()
         let rectTips = SvgUtils.createSVG(
             'rect',
             {

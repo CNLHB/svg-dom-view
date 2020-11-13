@@ -8,6 +8,7 @@ import {createPropsAndValue} from "../utils/utils";
  * 添加属性按钮
  */
 class AddBtn {
+
     constructor(public addBtn: JQuery) {
         this.addBtn = addBtn
         this.bindAddBtnClick()
@@ -30,10 +31,10 @@ class AddBtn {
             singleTip("属性名或属性值为空", "error")
             return
         }
-        if ($(event.currentTarget).hasClass("text-node")) {
-            singleTip("文本节点不能添加属性", "error")
-            return
-        }
+        // if ($(event.currentTarget).hasClass("text-node")) {
+        //     singleTip("文本节点不能添加属性", "error")
+        //     return
+        // }
         let domGraph: JQuery = $("#" + uid)
         let tag: string = domGraph.get(0).tagName
         let propsArr: string[] = domGraph.get(0).getAttributeNames()

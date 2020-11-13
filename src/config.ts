@@ -1,7 +1,10 @@
 let fixedProps: string[] = ["id", "class", "style", "transform", "stroke", "stroke-width", "fill"]
-export let singleTag: string [] = ["path", "line", "rect", "circle", "ellipse", "polyline", "polygon",]
+export let singleTag: string [] = ["path", "line", "rect", "circle", "ellipse", "polyline", "polygon"]
 export let doubleTag: string [] = ["svg", "text", "g"]
-
+let checkSvgTag: RegExp = /(?<=<)[a-z]+(?=[>| ])/g;
+//匹配标签
+let matchSvg: RegExp = /<[a-z]+([\s\S]*?) *?>|<!--([\s\S]*?)-->/g;
+let matchUpper: RegExp = /[A-Z]/g
 interface IPropsState {
     [key: string]: string[]
 }

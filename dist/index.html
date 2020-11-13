@@ -1,59 +1,79 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://at.alicdn.com/t/font_2158408_s0v3j7n7n3.css">
-    <link rel="stylesheet" href="./css.123d7813.css">
-    <title>svg-dom-view</title></head>
+    <link rel="stylesheet" href="/css.dfba648a.css">
+    <title>svg-dom-view</title>
+<script src="/css.dfba648a.js"></script></head>
+
 <body>
 <div class="container">
+    <!--  编辑区域  -->
     <div class="show show-edit" id="edit" contenteditable="true"></div>
+
+    <!--  图形区域  -->
     <div class="show show-view" id="graph">
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
-             id="graph-svg"
-             preserveAspectRatio="xMinYMin"
-             transform="translate(0,0)">
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="graph-svg" preserveAspectRatio="xMinYMin" transform="translate(0,0)">
 
         </svg>
+
     </div>
-    <div class="show show-dom" id="dom-view"><h1>DOM树展示区</h1>
+    <!--  dom Tree 区域  -->
+    <div class="show show-dom" id="dom-view">
+        <h1>DOM树展示区</h1>
         <menu id="menu">
+            <!--            删除节点、复制节点、粘贴节点、复制SVG、粘贴属性。-->
             <ul>
+
                 <li class="copy-node" data-type="copy-node">
                     <icon class="iconfont icon-copy menu-icon"></icon>
                     <span class="menu-text">复制节点</span></li>
+                
                 <li class="paste-node" data-type="paste-node">
                     <icon class="iconfont icon-niantie menu-icon"></icon>
                     <span class="menu-text">粘贴节点</span></li>
                 <div id="child-menu">
+                    <!--            删除节点、复制节点、粘贴节点、复制SVG、粘贴属性。-->
                     <ul>
                         <li class="paste-before" data-type="paste-before">
                             <icon class="iconfont icon-niantie menu-icon"></icon>
                             <span class="menu-text">节点之前</span></li>
+
+                        
                         <li class="paste-after" data-type="paste-after">
                             <icon class="iconfont icon-niantie menu-icon"></icon>
                             <span class="menu-text">节点之后</span></li>
+                        
                         <li class="paste-child" data-type="paste-child">
                             <icon class="iconfont icon-niantie menu-icon"></icon>
                             <span class="menu-text">为子节点</span></li>
+                        
                     </ul>
                 </div>
+                
                 <li class="copy-svg" data-type="copy-svg">
                     <icon class="iconfont icon-copy menu-icon"></icon>
                     <span class="menu-text">复制SVG</span></li>
+                
                 <li class="remove-node" data-type="remove-node">
                     <icon class="iconfont icon-cangpeitubiao_shanchu menu-icon"></icon>
-                    <span class="menu-text">删除节点</span></li>
+                    <span class="menu-text">删除节点</span>
+                </li>
+                <!--                <li class="paste-props">粘贴属性</li>-->
             </ul>
         </menu>
-        <div id="dom-show"></div>
+        <div id="dom-show">
+
+        </div>
     </div>
-    <div class="show show-attr" id="show-attr"><h1>Attribute属性展示区</h1>
+    <!--  属性区域 -->
+    <div class="show show-attr" id="show-attr">
+        <h1>Attribute属性展示区</h1>
         <div id="add-wrap">
             <div class="add-container">
-                <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend" style="padding-bottom:10px">
+                <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend" style="padding-bottom: 10px">
                     <div class="aiwa-input-group__prepend">props</div>
                     <input type="text" id="add-props" autocomplete="off" placeholder="请输入属性名" class="aiwa-input__inner">
                     <div class="aiwa-input-group__prepend">value</div>
@@ -62,9 +82,14 @@
                 <button type="button" id="add-btn" class="aiwa-button aiwa-button--primary"><span>增加属性</span></button>
             </div>
         </div>
-        <div id="attr-wrap"></div>
+        <!--   属性容器     -->
+        <div id="attr-wrap">
+
+        </div>
+
     </div>
 </div>
-<script src="./src.21343f1a.js"></script>
+
+<script src="/src.f10117fe.js"></script>
 </body>
 </html>

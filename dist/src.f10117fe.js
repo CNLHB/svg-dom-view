@@ -11670,6 +11670,10 @@ exports.isCheckNumber = exports.debounce = exports.getProps = exports.toCheckPro
 var fixedProps = ["id", "class", "style", "transform", "stroke", "stroke-width", "fill"];
 exports.singleTag = ["path", "line", "rect", "circle", "ellipse", "polyline", "polygon"];
 exports.doubleTag = ["svg", "text", "g"];
+var checkSvgTag = /(?<=<)[a-z]+(?=[>| ])/g; //匹配标签
+
+var matchSvg = /<[a-z]+([\s\S]*?) *?>|<!--([\s\S]*?)-->/g;
+var matchUpper = /[A-Z]/g;
 var propsState = {
   svg: ["x", "y", "width", "height", "viewBox"],
   text: ["x", "y", "width", "height", "font-family", "font-size"],
@@ -11743,12 +11747,8 @@ var index_1 = require("../index");
 
 var config_1 = require("../config");
 
-var index_2 = require("../index");
+var index_2 = require("../index"); //匹配Tag
 
-var checkSvgTag = /(?<=<)[a-z]+(?=[>| ])/g; //匹配标签
-
-var matchSvg = /<[a-z]+([\s\S]*?) *?>|<!--([\s\S]*?)-->/g;
-var matchUpper = /[A-Z]/g; //匹配Tag
 
 var matchTag = /<(\S*?)[^>]*>.*?|<.*? \/>/g; //匹配TagName
 
@@ -11787,6 +11787,9 @@ function () {
       var inputSingleTag = new Set();
       var inputDobuleTag = new Set();
       var illegalTag = new Set();
+      /**
+       * 循环遍历标签
+       */
 
       while (ret) {
         var retMatch = ret[0].match(regTag);
@@ -11817,27 +11820,20 @@ function () {
       if (checkXML.error_code == 1) {
         if (checkXML.msg.indexOf("mismatch") > -1) {
           errorFlag = true;
-          console.log("标签不匹配");
-          console.log(checkXML.msg, "error");
           singleTip_1.singleTip(checkXML.msg);
         } else if (checkXML.msg.indexOf("attributes") > -1) {
           errorFlag = true;
           singleTip_1.singleTip(checkXML.msg, "error");
-          console.log("属性不正确");
         } else if (checkXML.msg.indexOf("attribute") > -1) {
           errorFlag = true;
           singleTip_1.singleTip(checkXML.msg, "error");
-          console.log("错误解析属性名 circle cx");
         } else if (checkXML.msg.indexOf("&gt") > -1) {
           errorFlag = true;
           singleTip_1.singleTip(checkXML.msg, "error");
-          console.log("标签未正确闭合empty");
         } else if (checkXML.msg.indexOf("empty") > -1) {
           errorFlag = true;
           singleTip_1.singleTip(checkXML.msg, "error");
-          console.log("请输入正确的svg标签");
         } else {
-          console.log(checkXML.msg);
           errorFlag = true;
           singleTip_1.singleTip(checkXML.msg, "error");
         }
@@ -11858,6 +11854,7 @@ function () {
         index_1.svgInfo.svg.html();
         showDom.html();
         jquery_1.default("#graph-svg").html();
+        index_2.attrArea.getAttrArea().html(null);
         return;
       }
 
@@ -11867,7 +11864,6 @@ function () {
       var vDom = utils_1.deepKeyValue(nodes);
       index_1.svgInfo.svg.html(fragment);
       var rect = nodes.getBoundingClientRect();
-      console.log();
       var rectTips = createSVG_1.default.createSVG('rect', {
         x: 0,
         y: 0,
@@ -12190,24 +12186,30 @@ function () {
     this.copyNode = null;
 
     this.menuClickHandler = function (event) {
+      var _a;
+
       event.stopPropagation();
       var target = jquery_1.default(event.currentTarget);
       var type = target.attr("data-type");
       var oMenu = jquery_1.default("#menu");
       var cloneSvg = jquery_1.default();
       var selectSvg = jquery_1.default();
+      var flagText = false;
 
       if (type !== "paste-node" && (type === null || type === void 0 ? void 0 : type.startsWith("paste"))) {
         var copyUId = index_1.domTree.getSelectDom().attr("data-uid");
-        var id = copyUId + Math.ceil(Math.random() * 1000);
+        var id = copyUId + Math.ceil(Math.random() * 1000); //svg标签
+
         selectSvg = jquery_1.default("#" + copyUId);
 
         if (selectSvg.get(0).tagName == 'text') {
+          flagText = true;
           selectSvg.html(selectSvg.html() + ("\n                " + selectSvg.html() + "\n                "));
         } else {
           cloneSvg = selectSvg.clone(true);
           cloneSvg.attr("id", id);
-        }
+        } // "text-node"
+
 
         if (_this.copyNode != null) {
           _this.copyNode.attr("data-uid", id);
@@ -12220,10 +12222,18 @@ function () {
 
       switch (type) {
         case "remove-node":
-          index_1.domTree.getSelectDom().remove();
+          if (jquery_1.default("#graph-svg").get(0) == jquery_1.default("#" + index_1.domTree.getSelectDom().attr("data-uid")).parent().get(0)) {
+            jquery_1.default("#svg-tip").remove();
+          }
+
+          if (index_1.domTree.getSelectDom().hasClass("text-node")) {
+            index_1.domTree.getSelectDom().parent().remove();
+          } else {
+            index_1.domTree.getSelectDom().remove();
+          }
+
           jquery_1.default("#" + index_1.domTree.getSelectDom().attr("data-uid")).remove();
-          jquery_1.default("#svg-tip").remove();
-          jquery_1.default("#rect-tip").remove();
+          jquery_1.default("#rect-tip").css("display", "none");
           oMenu.css({
             display: "none"
           });
@@ -12284,9 +12294,13 @@ function () {
           var tag = selectSvg.get(0).tagName;
 
           if (utils_1.doubleTag.indexOf(tag) !== -1) {
-            selectSvg.append(cloneSvg);
-            index_1.domTree.getSelectDom().append(_this.copyNode);
-            singleTip_1.singleTip("粘贴节点成功");
+            if (flagText && ((_a = _this.copyNode) === null || _a === void 0 ? void 0 : _a.hasClass("text-node"))) {
+              singleTip_1.singleTip("文本节点没有子节点", "error");
+            } else {
+              selectSvg.append(cloneSvg);
+              index_1.domTree.getSelectDom().append(_this.copyNode);
+              singleTip_1.singleTip("粘贴节点成功", "success");
+            }
           } else {
             singleTip_1.singleTip("所选节点没有子节点", "error");
           }
@@ -12516,12 +12530,11 @@ function () {
       if (!props || !propsValue) {
         singleTip_1.singleTip("属性名或属性值为空", "error");
         return;
-      }
+      } // if ($(event.currentTarget).hasClass("text-node")) {
+      //     singleTip("文本节点不能添加属性", "error")
+      //     return
+      // }
 
-      if (jquery_1.default(event.currentTarget).hasClass("text-node")) {
-        singleTip_1.singleTip("文本节点不能添加属性", "error");
-        return;
-      }
 
       var domGraph = jquery_1.default("#" + uid);
       var tag = domGraph.get(0).tagName;
@@ -12628,7 +12641,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57342" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51549" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
