@@ -2,17 +2,18 @@ import $ from 'jquery'
 import MouseMoveEvent = JQuery.MouseMoveEvent;
 import MouseDownEvent = JQuery.MouseDownEvent;
 
+/**
+ * 创建图形区域
+ */
 class SvgInfo {
-    public width: number = 0;
-    public height: number = 0;
-    public clientWidth = document.documentElement.clientWidth
-    public clientHeight = document.documentElement.clientHeight
-    public scrollIndex: number = 0
-    public scrollPower: number = 0.25
-    public scale: number = 1
-    public viewBox: string = "0,0,"
-    public startX: number = 0
-    public startY: number = 0
+    private readonly width: number;
+    private readonly height: number;
+    private scrollIndex: number = 0
+    private scrollPower: number = 0.25
+    private scale: number = 1
+    private viewBox: string = "0,0,"
+    private startX: number = 0
+    private startY: number = 0
 
     constructor(width: number, height: number, public svg: JQuery) {
         this.width = width;
@@ -81,7 +82,8 @@ class SvgInfo {
      * 在图形区绑定鼠标滚轮事件
      */
     bindMousewheel(): void {
-        this.svg.on('mousewheel DOMMouseScroll', (event: any): void => {
+        //DOMMouseScroll
+        this.svg.on('mousewheel', (event: any): void => {
             if (event.originalEvent != null) {
                 if (event.originalEvent.wheelDelta > 0) {
                     this.updateSVG("shrink")
@@ -137,8 +139,6 @@ class SvgInfo {
             let y = (tmp[1] - translateY)
             tmp[0] = x > tmp[3] ? tmp[3] : x
             tmp[1] = y > tmp[4] ? tmp[4] : y
-            // tmp[0] < 0 ? tmp[0] = 0 : ""
-            // tmp[1] < 0 ? tmp[1] = 0 : ""
             this.svg.attr("viewBox", tmp.join(","))
         }
         this.startX = event.pageX

@@ -1,23 +1,33 @@
-type TipType = "error" | "success" | "wraning" | "default"
+/**
+ * 提醒框类型
+ */
+type TipType = "error" | "success" | "warning" | "default"
+/**
+ * 定义svg需闭合标签
+ */
 export let doubleTag: string[] = ["svg", "g", "text"]
+/**
+ * 定义svg标签
+ */
 export let svgType: string[] = ["svg", "g", "path", "text", "line", "rect", "ellipse", "circle", "polyline", "polygon"]
 
-function getElementToPageLeft(el: any, key: string) {
-    let offset = key == 'top' ? 'offsetTop' : 'offsetLeft'
-    let actualTop = el[offset]
-    let current = el.offsetParent
-    while (current !== null) {
-        actualTop += current[offset]
-        current = current.offsetParent
-    }
-    return actualTop
+export interface IProps {
+    [key: string]: string
+}
+
+/**
+ * 定义虚拟节点
+ */
+export interface IVDomNode {
+    tag?: string;
+    props: IProps;
+    children: IVDomNode[] | string
 }
 
 
 function Nullable() {
 
 }
-
 
 
 export function createSingleTips() {
@@ -35,7 +45,7 @@ export function createSingleTips() {
             case "error":
                 color = "#f56c6c"
                 break;
-            case "wraning":
+            case "warning":
                 color = "#e6a23c"
                 break;
         }
@@ -83,22 +93,25 @@ export function createSingleTips() {
  * @param vdom
  * return domStr
  */
-export function createElementByVdom(vdom: IVDomNode) {
+export function createElementByVdom(vdom: IVDomNode): string {
     let isText: boolean = typeof vdom.children === 'string'
     let len: number = vdom.children.length;
-    if (isText && len == 0) {
-        return ''
+
+    if (!Array.isArray(vdom.children)) {
+        if (vdom.children.replace(/\s*/gm, "").length == 0) {
+            return ''
+        }
     }
     let isDobuleTag: boolean = doubleTag.indexOf(vdom.tag as string) != -1
     let str = '';
     // @ts-ignore
     Object.entries(vdom.props).forEach((item: string[]) => {
+
         if (item[0] !== "data-uid" && item[0].trim()) {
             str += `<span class="wrap-${item[0]}"><span class="props name-${item[0]}">${item[0]}</span>=<span class="props-value">${item[1]}</span></span>`
         }
     })
-    let isShriColumn = false;
-    var dom = `
+    let dom = `
     <div  data-uid=${vdom.props['data-uid']} id=${"dom-" + vdom.props['data-uid']} class="show-wrapper">
     ${len === 0 ? "" : '<icon  class="icon iconfont icon-sanjiaoright"></icon>'}
     <span class='${isDobuleTag ? "double-head" : "head"} head-wrap'>${vdom.tag}<span class="props-wrap">${str}</span>
@@ -110,11 +123,10 @@ export function createElementByVdom(vdom: IVDomNode) {
     ${isDobuleTag ? `<span class=${len == 0 ? "foot-one" : "foot"}>${vdom.tag}</span>` : ''}
     </div>
     `
-
     return dom
 }
 
-export function createElemTextByVdom(vdom: IVDomNode[]) {
+export function createElemTextByVdom(vdom: IVDomNode[]): string {
     let strDom = ''
     vdom.forEach(item => {
         strDom += createElementByVdom(item)
@@ -133,18 +145,8 @@ export function createPropsAndValue(item: string, value: string, uid: string, in
     return attrHtml
 }
 
-export interface IProps {
-    [key: string]: string
-}
 
-export interface IVDomNode {
-    tag?: string;
-    props: IProps;
-    children: IVDomNode[] | string
-}
-
-export function deepKeyValue(nodes: any) {
-
+export function deepKeyValue(nodes: any): IVDomNode {
     let obj: IVDomNode = {
         props: {},
         children: []
@@ -178,7 +180,4 @@ export function deepKeyValue(nodes: any) {
     return obj
 }
 
-let clientWidth = document.documentElement.clientWidth,
-    clientHeight = document.documentElement.clientHeight;
 
-export default getElementToPageLeft

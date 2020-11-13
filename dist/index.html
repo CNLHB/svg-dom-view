@@ -1,179 +1,70 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://at.alicdn.com/t/font_2158408_s0v3j7n7n3.css">
-    <link rel="stylesheet" href="/css.967bad95.css">
-    <title>svg-dom-view</title>
-<script src="/css.967bad95.js"></script></head>
-
+    <link rel="stylesheet" href="./css.123d7813.css">
+    <title>svg-dom-view</title></head>
 <body>
 <div class="container">
     <div class="show show-edit" id="edit" contenteditable="true"></div>
     <div class="show show-view" id="graph">
-<!--        <span>DOM树展示区2222222222222222222222222</span>-->
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="graph-svg" preserveAspectRatio="xMinYMin" transform="translate(0,0)">
-                <rect x="0" y="0" width="100" height="100" opacity=".1" style="fill:#4959aa;stroke-width:1;stroke:rgb(0,0,0)"></rect>
-                <circle cx="100" cy="50" r="40" stroke="black" stroke-width="2" fill="red"></circle>
-                <text x="0" y="15" fill="red">I love SVG</text>
-                <text x="0" y="15" fill="red"></text>
-                <!--xx-->
-                <polyline points="20,20 40,25 60,40 80,120 120,140 200,180" style="fill:none;stroke:black;stroke-width:3"></polyline>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+             id="graph-svg"
+             preserveAspectRatio="xMinYMin"
+             transform="translate(0,0)">
 
         </svg>
-
     </div>
-    <div class="show show-dom" id="dom-view">
-        <h1>DOM树展示区</h1>
+    <div class="show show-dom" id="dom-view"><h1>DOM树展示区</h1>
         <menu id="menu">
-            <!--            删除节点、复制节点、粘贴节点、复制SVG、粘贴属性。-->
             <ul>
-
                 <li class="copy-node" data-type="copy-node">
                     <icon class="iconfont icon-copy menu-icon"></icon>
                     <span class="menu-text">复制节点</span></li>
-                
                 <li class="paste-node" data-type="paste-node">
                     <icon class="iconfont icon-niantie menu-icon"></icon>
                     <span class="menu-text">粘贴节点</span></li>
                 <div id="child-menu">
-                    <!--            删除节点、复制节点、粘贴节点、复制SVG、粘贴属性。-->
                     <ul>
                         <li class="paste-before" data-type="paste-before">
                             <icon class="iconfont icon-niantie menu-icon"></icon>
                             <span class="menu-text">节点之前</span></li>
-
-                        
                         <li class="paste-after" data-type="paste-after">
                             <icon class="iconfont icon-niantie menu-icon"></icon>
                             <span class="menu-text">节点之后</span></li>
-                        
                         <li class="paste-child" data-type="paste-child">
                             <icon class="iconfont icon-niantie menu-icon"></icon>
                             <span class="menu-text">为子节点</span></li>
-                        
                     </ul>
                 </div>
-                
                 <li class="copy-svg" data-type="copy-svg">
                     <icon class="iconfont icon-copy menu-icon"></icon>
                     <span class="menu-text">复制SVG</span></li>
-                
                 <li class="remove-node" data-type="remove-node">
                     <icon class="iconfont icon-cangpeitubiao_shanchu menu-icon"></icon>
-                    <span class="menu-text">删除节点</span>
-                </li>
-                <!--                <li class="paste-props">粘贴属性</li>-->
+                    <span class="menu-text">删除节点</span></li>
             </ul>
         </menu>
-        <div id="dom-show">
-            <div data-uid="svg-599" class="show-wrapper show-active">
-                <icon class="icon iconfont icon-xiajiantou"></icon>
-                <span class="double-head">svg<span class="props-wrap"><span class="props">xmlns</span>=<span class="props-value">http://www.w3.org/2000/svg</span><span class="props">version</span>=<span class="props-value">1.1</span></span>
-    </span>
-                <div class="tree-children">
-
-                    <div data-uid="circle-6190" class="show-wrapper">
-
-    <span class="head">circle<span class="props-wrap"><span class="props">cx</span>=<span class="props-value">100</span><span class="props">cy</span>=<span class="props-value">50</span><span class="props">r</span>=<span class="props-value">40</span><span class="props">stroke</span>=<span class="props-value">black</span><span class="props">stroke-width</span>=<span class="props-value">2</span><span class="props">fill</span>=<span class="props-value">red</span></span>
-    </span>
-                        <div class="tree-children">
-
-                        </div>
-
-
-                    </div>
-
-                    <div data-uid="text-1909" class="show-wrapper">
-                        <icon class="icon iconfont icon-sanjiaoright"></icon>
-                        <span class="double-head">text<span class="props-wrap"><span class="props">x</span>=<span class="props-value">0</span><span class="props">y</span>=<span class="props-value">15</span><span class="props">fill</span>=<span class="props-value">red</span></span>
-    </span>
-                        <div class="tree-children">
-                            I love SVG
-                        </div>
-                        <span class="hiddle">...</span>
-                        <span class="foot">text</span>
-                    </div>
-
-                    <div data-uid="svg-79" class="show-wrapper">
-                        <icon class="icon iconfont icon-sanjiaoright"></icon>
-                        <span class="double-head">svg<span class="props-wrap"><span class="props">xmlns</span>=<span class="props-value">http://www.w3.org/2000/svg</span><span class="props">version</span>=<span class="props-value">1.1</span></span>
-    </span>
-                        <div class="tree-children">
-
-                            <div data-uid="polyline-2384" class="show-wrapper">
-
-    <span class="head">polyline<span class="props-wrap"><span class="props">points</span>=<span class="props-value">20,20 40,25 60,40 80,120 120,140 200,180</span><span class="props">style</span>=<span class="props-value">fill:none;stroke:black;stroke-width:3</span></span>
-    </span>
-                                <div class="tree-children">
-
-                                </div>
-
-
-                            </div>
-
-                            <div data-uid="svg-4564" class="show-wrapper">
-                                <icon class="icon iconfont icon-sanjiaoright"></icon>
-                                <span class="double-head">svg<span class="props-wrap"><span class="props">xmlns</span>=<span class="props-value">http://www.w3.org/2000/svg</span><span class="props">version</span>=<span class="props-value">1.1</span></span>
-    </span>
-                                <div class="tree-children">
-
-                                    <div data-uid="polyline-103" class="show-wrapper">
-
-    <span class="head">polyline<span class="props-wrap"><span class="props">points</span>=<span class="props-value">20,20 40,25 60,40 80,120 120,140 200,180</span><span class="props">style</span>=<span class="props-value">fill:none;stroke:black;stroke-width:3</span></span>
-    </span>
-                                        <div class="tree-children">
-
-                                        </div>
-
-
-                                    </div>
-
-                                </div>
-                                <span class="hiddle">...</span>
-                                <span class="foot">svg</span>
-                            </div>
-
-                        </div>
-                        <span class="hiddle">...</span>
-                        <span class="foot">svg</span>
-                    </div>
-
-                </div>
-                <span class="hiddle">...</span>
-                <span class="foot">svg</span>
-            </div>
-
-        </div>
+        <div id="dom-show"></div>
     </div>
-    <div class="show show-attr" id="show-attr">
-        <h1>Attribute属性展示区</h1>
+    <div class="show show-attr" id="show-attr"><h1>Attribute属性展示区</h1>
         <div id="add-wrap">
-            <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend" style="padding-bottom: 10px">
-                <div class="aiwa-input-group__prepend">props</div>
-                <input type="text" id="add-props" autocomplete="off" placeholder="请输入属性名" class="aiwa-input__inner">
-                <div class="aiwa-input-group__prepend">value</div>
-                <input type="text" id="add-value" autocomplete="off" placeholder="请输入属性值" class="aiwa-input__inner">
+            <div class="add-container">
+                <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend" style="padding-bottom:10px">
+                    <div class="aiwa-input-group__prepend">props</div>
+                    <input type="text" id="add-props" autocomplete="off" placeholder="请输入属性名" class="aiwa-input__inner">
+                    <div class="aiwa-input-group__prepend">value</div>
+                    <input type="text" id="add-value" autocomplete="off" placeholder="请输入属性值" class="aiwa-input__inner">
+                </div>
+                <button type="button" id="add-btn" class="aiwa-button aiwa-button--primary"><span>增加属性</span></button>
             </div>
-            <button type="button" id="add-btn" class="aiwa-button aiwa-button--primary"><span>增加属性</span></button>
         </div>
-
-        <div id="attr-wrap">
-
-        </div>
-
+        <div id="attr-wrap"></div>
     </div>
 </div>
-<!--<div  class="aiwa-message-box__wrapper"-->
-<!--     style="z-index: 2012;">-->
-<!--    <div class="aiwa-message-box">-->
-<!--        <div class="aiwa-input aiwa-input-group aiwa-input-group&#45;&#45;prepend">-->
-<!--            <div class="aiwa-input-group__prepend">name</div>-->
-<!--            <input type="text" autocomplete="off" placeholder="请输入内容" class="aiwa-input__inner">-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
-<script src="/src.77de5100.js"></script>
+<script src="./src.21343f1a.js"></script>
 </body>
 </html>

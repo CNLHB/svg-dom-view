@@ -96,6 +96,7 @@ class DomTree {
             oMenu.css({display: "none"})
         }
         menuChild.css({display: "none"})
+
         $("#rect-tip").css("display", "none");
         this.setSelectDom(null)
     }
@@ -120,6 +121,7 @@ class DomTree {
         }
         target.toggleClass("select-dom")
         let uid: string = target.attr("data-uid") as string
+        $(".add-container").css("display", "block");
         let addBtn: JQuery = $("#add-btn")
         addBtn.attr("data-uid", uid)
         addBtn.addClass("text-node")

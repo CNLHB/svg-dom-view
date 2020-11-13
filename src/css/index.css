@@ -25,7 +25,7 @@ html, body, ul, li {
     height: 100%;
     width: 100%;
     background-color: white;
-    border: 1px solid greenyellow;
+    /*border: 1px solid greenyellow;*/
     /*transform-box:fill-box;*/
     /*transform-origin:center;*/
     /*transform:scale(2);*/
@@ -46,7 +46,6 @@ html, body, ul, li {
 }
 
 #graph-svg >svg {
-    border: 1px solid greenyellow;
     overflow: inherit;
 }
 
@@ -379,3 +378,6 @@ h1 {
     overflow: hidden;
     backface-visibility: hidden;
  }
+.add-container{
+    display: none;
+}

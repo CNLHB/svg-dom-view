@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": " chcp 65001 & ts-node ./src/crowller",
-    "dev:build": "parcel build src/index.html",
+    "dev:build": "parcel build index.html",
     "dev:start": "nodemon node ./build/index.js",
-    "start": "parcel -p 1234 src/index.html",
+    "start": "parcel -p 1234 index.html",
     "test": "tsc && node ./build/src/controller/LoginController.js"
   },
   "repository": {

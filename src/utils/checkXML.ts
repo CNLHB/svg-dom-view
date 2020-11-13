@@ -8,7 +8,7 @@ interface validateXMLResult {
  */
 function validateXML(xmlContent: string): validateXMLResult {
     //errorCode 0是xml正确，1是xml错误，2是无法验证
-    var xmlDoc, errorMessage, errorCode = 0;
+    let xmlDoc, errorMessage, errorCode = 0;
     // code for IE
     // @ts-ignore
     if (window.ActiveXObject) {

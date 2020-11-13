@@ -117,39 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"utils/createSVG.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var SvgUtils =
-/** @class */
-function () {
-  function SvgUtils() {}
-
-  SvgUtils.createSVG = function (tag, attrs) {
-    var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-
-    for (var k in attrs) {
-      el.setAttribute(k, attrs[k]);
-    }
-
-    return el;
-  };
-
-  SvgUtils.updateSVG = function (tag, attrs) {
-    for (var k in attrs) {
-      tag.setAttribute(k, attrs[k]);
-    }
-  };
-
-  return SvgUtils;
-}();
-
-exports.default = SvgUtils;
-},{}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/node_modules/process/browser.js":[function(require,module,exports) {
+})({"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/node_modules/process/browser.js":[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {}; // cached from whatever global is present so that test runners that stub it
@@ -11257,10 +11225,6 @@ function () {
     var _this = this;
 
     this.svg = svg;
-    this.width = 0;
-    this.height = 0;
-    this.clientWidth = document.documentElement.clientWidth;
-    this.clientHeight = document.documentElement.clientHeight;
     this.scrollIndex = 0;
     this.scrollPower = 0.25;
     this.scale = 1;
@@ -11303,8 +11267,7 @@ function () {
         var x = tmp[0] - translateX;
         var y = tmp[1] - translateY;
         tmp[0] = x > tmp[3] ? tmp[3] : x;
-        tmp[1] = y > tmp[4] ? tmp[4] : y; // tmp[0] < 0 ? tmp[0] = 0 : ""
-        // tmp[1] < 0 ? tmp[1] = 0 : ""
+        tmp[1] = y > tmp[4] ? tmp[4] : y;
 
         _this.svg.attr("viewBox", tmp.join(","));
       }
@@ -11469,7 +11432,7 @@ function createSingleTips() {
         color = "#f56c6c";
         break;
 
-      case "wraning":
+      case "warning":
         color = "#e6a23c";
         break;
     }
@@ -11505,8 +11468,10 @@ function createElementByVdom(vdom) {
   var isText = typeof vdom.children === 'string';
   var len = vdom.children.length;
 
-  if (isText && len == 0) {
-    return '';
+  if (!Array.isArray(vdom.children)) {
+    if (vdom.children.replace(/\s*/gm, "").length == 0) {
+      return '';
+    }
   }
 
   var isDobuleTag = exports.doubleTag.indexOf(vdom.tag) != -1;
@@ -11517,7 +11482,6 @@ function createElementByVdom(vdom) {
       str += "<span class=\"wrap-" + item[0] + "\"><span class=\"props name-" + item[0] + "\">" + item[0] + "</span>=<span class=\"props-value\">" + item[1] + "</span></span>";
     }
   });
-  var isShriColumn = false;
   var dom = "\n    <div  data-uid=" + vdom.props['data-uid'] + " id=" + ("dom-" + vdom.props['data-uid']) + " class=\"show-wrapper\">\n    " + (len === 0 ? "" : '<icon  class="icon iconfont icon-sanjiaoright"></icon>') + "\n    <span class='" + (isDobuleTag ? "double-head" : "head") + " head-wrap'>" + vdom.tag + "<span class=\"props-wrap\">" + str + "</span>\n    </span>\n     " + (isText == true ? "<div data-uid=" + vdom.props['data-uid'] + " class=\"text-node show-wrapper tree-children\">" + vdom.children + "</div>" : len > 0 ? "<div class=\"tree-children\">" + createElemTextByVdom(vdom.children) + "</div>" : '') + "\n    " + (len == 0 ? "" : '<span class="hiddle">...</span>') + "\n    " + (isDobuleTag ? "<span class=" + (len == 0 ? "foot-one" : "foot") + ">" + vdom.tag + "</span>" : '') + "\n    </div>\n    ";
   return dom;
 }
@@ -11585,8 +11549,6 @@ function deepKeyValue(nodes) {
 }
 
 exports.deepKeyValue = deepKeyValue;
-var clientWidth = document.documentElement.clientWidth,
-    clientHeight = document.documentElement.clientHeight;
 exports.default = getElementToPageLeft;
 },{}],"utils/checkXML.ts":[function(require,module,exports) {
 "use strict";
@@ -11652,6 +11614,38 @@ function validateXML(xmlContent) {
 
 
 exports.default = validateXML;
+},{}],"utils/createSVG.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var SvgUtils =
+/** @class */
+function () {
+  function SvgUtils() {}
+
+  SvgUtils.createSVG = function (tag, attrs) {
+    var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+
+    for (var k in attrs) {
+      el.setAttribute(k, attrs[k]);
+    }
+
+    return el;
+  };
+
+  SvgUtils.updateSVG = function (tag, attrs) {
+    for (var k in attrs) {
+      tag.setAttribute(k, attrs[k]);
+    }
+  };
+
+  return SvgUtils;
+}();
+
+exports.default = SvgUtils;
 },{}],"js/singleTip.ts":[function(require,module,exports) {
 "use strict";
 
@@ -11669,11 +11663,11 @@ exports.singleTip = utils_1.createSingleTips();
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.checkInter = exports.debounce = exports.getProps = exports.toCheckProps = exports.doubleTag = exports.singleTag = void 0;
+exports.isCheckNumber = exports.debounce = exports.getProps = exports.toCheckProps = exports.doubleTag = exports.singleTag = void 0;
 var fixedProps = ["id", "class", "style", "transform", "stroke", "stroke-width", "fill"];
 exports.singleTag = ["path", "line", "rect", "circle", "ellipse", "polyline", "polygon"];
 exports.doubleTag = ["svg", "text", "g"];
-var propsStrate = {
+var propsState = {
   svg: ["x", "y", "width", "height", "viewBox"],
   text: ["x", "y", "width", "height", "font-family", "font-size"],
   path: ["d"],
@@ -11689,7 +11683,7 @@ var propsStrate = {
 exports.toCheckProps = ["stroke-width", "x", "y", "height", "cx", "cy", "rx", "ry", "width", "x1", "x2", "y2", "y1", "font-size"];
 
 function getProps(tag) {
-  return fixedProps.concat(propsStrate[tag]);
+  return fixedProps.concat(propsState[tag]);
 }
 
 exports.getProps = getProps;
@@ -11709,7 +11703,7 @@ function debounce(fn, time) {
 
 exports.debounce = debounce;
 
-function checkInter(str, val) {
+function isCheckNumber(str, val) {
   if (exports.toCheckProps.indexOf(str) !== -1) {
     var reg = /[A-Za-z_.]/g;
     return !reg.test(val);
@@ -11718,7 +11712,7 @@ function checkInter(str, val) {
   return true;
 }
 
-exports.checkInter = checkInter;
+exports.isCheckNumber = isCheckNumber;
 },{}],"js/editArea.ts":[function(require,module,exports) {
 "use strict";
 
@@ -11746,13 +11740,15 @@ var index_1 = require("../index");
 
 var config_1 = require("../config");
 
+var index_2 = require("../index");
+
 var checkSvgTag = /(?<=<)[a-z]+(?=[>| ])/g; //匹配标签
 
 var matchSvg = /<[a-z]+([\s\S]*?) *?>|<!--([\s\S]*?)-->/g; //匹配svg
 
-var matchSvgTag = /<svg([\s\S]*?)<\/svg>/g;
 var matchTag = /<(\S*?)[^>]*>.*?|<.*? \/>/g;
-var matchUpper = /[A-Z]/;
+var matchUpper = /[A-Z]/g;
+var regTag = /(?<=<)[a-z]+(?= +)|[a-z]+(?=>)/g;
 
 var EditArea =
 /** @class */
@@ -11778,17 +11774,8 @@ function () {
       _this.editText = _this.editText.replace(/\n/, " ");
       _this.editText = _this.editText.replace(/\n/gm, " ");
       _this.editText = _this.editText.replace(/\s+/g, " ").replace(/(?<=>) *(?=<)/g, "\n        ");
-      var svgArr = _this.editText.match(matchSvgTag) == null ? [] : _this.editText.match(matchSvgTag);
-      var svgArrTag = _this.editText.match(matchSvg) == null ? [] : _this.editText.match(matchSvg);
-
-      var tagNameArr = _this.editText.match(checkSvgTag);
-
-      var tagArr = _this.editText.match(matchTag);
-
-      var svgTagArr = [];
       var ret = matchTag.exec(_this.editText);
       if (ret == null) return singleTip_1.singleTip("请输入正确的svg字符串", "error");
-      var regTag = /(?<=<)[a-z]+(?= +)|[a-z]+(?=>)/g;
       var matchTagAll = [];
       var inputSingleTag = new Set();
       var inputDobuleTag = new Set();
@@ -11815,46 +11802,14 @@ function () {
         ret = matchTag.exec(_this.editText);
       }
 
-      if (illegalTag.size > 0) {
-        singleTip_1.singleTip(Array.from(illegalTag).join(", ") + " is not an svg tag", "wraning");
-      }
-
-      var startTagArr = [];
-      var endTagArr = [];
-      var reg = /(?<=<)[a-z]+(?= +)/g;
-      console.log(matchTagAll);
-      console.log(_this.editText);
-      if (matchTagAll[0] !== "svg") return singleTip_1.singleTip("root标签必须是svg", "error"); // let len: number = matchTagAll.length
-      // for (let i = 0; i < len; i++) {
-      //     let value = matchTagAll[i]
-      //     if (value.startsWith("/")) {
-      //         endTagArr.push(value)
-      //     } else {
-      //         startTagArr.push(value)
-      //     }
-      // }
-      // let startLen = startTagArr.length
-      // let copyArr = startTagArr.slice()
-      // for (let i = 0; i < startLen; i++) {
-      //     if (inputSingleTag.has(startTagArr[i])) {
-      //         copyArr.shift()
-      //         continue
-      //     }
-      //     if (inputDobuleTag.has(startTagArr[i]) && ("/" + copyArr.shift() == endTagArr.pop())) {
-      //
-      //     } else {
-      //         return singleTip(startTagArr[i] + " is not closing properly", "error")
-      //     }
-      // }
-
+      if (matchTagAll[0] !== "svg") return singleTip_1.singleTip("root标签必须是svg", "error");
       var showDom = jquery_1.default("#dom-show");
       var checkXML = checkXML_1.default(_this.editText);
       var errorFlag = false;
 
       if (checkXML.error_code == 1) {
         if (checkXML.msg.indexOf("mismatch") > -1) {
-          errorFlag = true; //error on line 3 at column 10: Opening and ending tag mismatch: svg1 line 0 and svg
-
+          errorFlag = true;
           console.log("标签不匹配");
           console.log(checkXML.msg, "error");
           singleTip_1.singleTip(checkXML.msg);
@@ -11881,7 +11836,12 @@ function () {
         }
       } else {
         console.log(checkXML_1.default(_this.editText).msg);
-        singleTip_1.singleTip(checkXML.msg, "success");
+
+        if (illegalTag.size > 0) {
+          singleTip_1.singleTip(Array.from(illegalTag).join(", ") + " is not an svg tag", "warning");
+        } else {
+          singleTip_1.singleTip(checkXML.msg, "success");
+        }
       } // @ts-ignore
 
 
@@ -11891,17 +11851,16 @@ function () {
         index_1.svgInfo.svg.html();
         showDom.html();
         jquery_1.default("#graph-svg").html();
-        console.log(888);
         return;
       }
 
       fragment.appendChild(jquery_1.default(_this.editText)[0]);
-      var nodes = null;
+      var nodes;
       nodes = fragment.firstElementChild;
-      nodes.setAttribute("height", String(index_1.svgInfo.width));
-      nodes.setAttribute("width", String(index_1.svgInfo.height));
       var vDom = utils_1.deepKeyValue(nodes);
       index_1.svgInfo.svg.html(fragment);
+      var rect = nodes.getBoundingClientRect();
+      console.log();
       var rectTips = createSVG_1.default.createSVG('rect', {
         x: 0,
         y: 0,
@@ -11913,8 +11872,22 @@ function () {
         'stroke-width': 2,
         fill: '#89cff0'
       });
+      var svgTips = createSVG_1.default.createSVG('rect', {
+        x: 0,
+        y: 0,
+        width: rect.width,
+        height: rect.height,
+        stroke: 'greenyellow',
+        opacity: "0.5",
+        id: 'svg-tip',
+        'stroke-width': 2,
+        fill: 'transparent'
+      });
+      jquery_1.default("#graph-svg").append(svgTips);
       jquery_1.default("#graph-svg").append(rectTips);
       showDom.html(utils_1.createElementByVdom(vDom));
+      jquery_1.default(".add-container").css("display", 'none');
+      index_2.attrArea.getAttrArea().html(null);
     };
 
     this.edit = edit;
@@ -12036,6 +12009,7 @@ function () {
 
       target.toggleClass("select-dom");
       var uid = target.attr("data-uid");
+      jquery_1.default(".add-container").css("display", "block");
       var addBtn = jquery_1.default("#add-btn");
       addBtn.attr("data-uid", uid);
       addBtn.addClass("text-node");
@@ -12228,6 +12202,9 @@ function () {
       switch (type) {
         case "remove-node":
           index_1.domTree.getSelectDom().remove();
+          jquery_1.default("#" + index_1.domTree.getSelectDom().attr("data-uid")).remove();
+          jquery_1.default("#svg-tip").remove();
+          jquery_1.default("#rect-tip").remove();
           oMenu.css({
             display: "none"
           });
@@ -12343,13 +12320,30 @@ function () {
     var _this = this;
 
     this.attrArea = attrArea;
+    /**
+     * 缓存输入框的值
+     * @private cacheText
+     */
+
     this.cacheText = '';
+    /**
+     * 缓存输入框的props id
+     * @private cacheId
+     */
+
     this.cacheId = '';
+    /**
+     * 输入框改变事件处理函数
+     * @param event
+     */
 
     this.inputChangeHandler = function (event) {
       var target = jquery_1.default(event.target);
       var id = target.attr('id');
       var propsValue = target.val().trim();
+      /**
+       * 没有选择dom Tree 区域标签， 直接返回
+       */
 
       if (id != null) {
         var uid = id.split('_');
@@ -12358,15 +12352,21 @@ function () {
           _this.cacheText = '';
           return;
         }
+        /**
+         * 数值检验不合法， 直接返回
+         */
 
-        console.log();
 
-        if (uid[1] && !config_1.checkInter(uid[1], propsValue)) {
+        if (uid[1] && !config_1.isCheckNumber(uid[1], propsValue)) {
           singleTip_1.singleTip("请输入有效的数值", "error");
           target.val(_this.cacheId === id ? _this.cacheText : "");
           _this.cacheId = id;
           return;
         }
+        /**
+         * node节点
+         */
+
 
         if (uid[1] == "content") {
           jquery_1.default("#dom-" + uid[0]).children(".text-node").text(propsValue);
@@ -12375,7 +12375,7 @@ function () {
           return;
         }
 
-        var domGraph = jquery_1.default("#" + uid[0]); // console.log(domGraph)
+        var domGraph = jquery_1.default("#" + uid[0]);
 
         if (target.val()) {
           domGraph.attr(uid[1], propsValue);
@@ -12429,9 +12429,21 @@ function () {
     this.bindInputChange();
   }
 
+  AttrArea.prototype.getAttrArea = function () {
+    return this.attrArea;
+  };
+  /**
+   * 删除属性按钮绑定删除事件
+   */
+
+
   AttrArea.prototype.bindDeleteBtnClick = function () {
     this.attrArea.on('click', '.delete-btn', this.deleteBtnClickHandler);
   };
+  /**
+   * 在input输入框中绑定修改事件
+   */
+
 
   AttrArea.prototype.bindInputChange = function () {
     this.attrArea.on('input', 'input', this.inputChangeHandler);
@@ -12546,9 +12558,7 @@ var __importDefault = this && this.__importDefault || function (mod) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.domTree = exports.svgInfo = void 0;
-
-var createSVG_1 = __importDefault(require("./utils/createSVG"));
+exports.attrArea = exports.domTree = exports.svgInfo = void 0;
 
 var jquery_1 = __importDefault(require("jquery"));
 
@@ -12565,20 +12575,13 @@ var attrArea_1 = __importDefault(require("./js/attrArea"));
 var addBtn_1 = __importDefault(require("./js/addBtn"));
 
 exports.svgInfo = new svgInfo_1.default(jquery_1.default('#graph').width() || 500, jquery_1.default('#graph').height() || 500, jquery_1.default('#graph-svg'));
-exports.domTree = new domTree_1.default(jquery_1.default("#dom-view"));
+var domView = jquery_1.default("#dom-view");
+exports.domTree = new domTree_1.default(domView);
+var selMenu = new selMenu_1.default(domView);
 var editArea = new editArea_1.default(jquery_1.default('#edit'));
-var selMenu = new selMenu_1.default(jquery_1.default("#dom-view"));
-var attrArea = new attrArea_1.default(jquery_1.default("#attr-wrap"));
+exports.attrArea = new attrArea_1.default(jquery_1.default("#attr-wrap"));
 var addBtn = new addBtn_1.default(jquery_1.default("#add-btn"));
-var circle = createSVG_1.default.createSVG('circle', {
-  cx: 100,
-  cy: 50,
-  r: 40,
-  stroke: 'black',
-  'stroke-width': 2,
-  fill: 'red'
-});
-},{"./utils/createSVG":"utils/createSVG.ts","jquery":"../node_modules/jquery/dist/jquery.js","./js/svgInfo":"js/svgInfo.ts","./js/editArea":"js/editArea.ts","./js/domTree":"js/domTree.ts","./js/selMenu":"js/selMenu.ts","./js/attrArea":"js/attrArea.ts","./js/addBtn":"js/addBtn.ts"}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"jquery":"../node_modules/jquery/dist/jquery.js","./js/svgInfo":"js/svgInfo.ts","./js/editArea":"js/editArea.ts","./js/domTree":"js/domTree.ts","./js/selMenu":"js/selMenu.ts","./js/attrArea":"js/attrArea.ts","./js/addBtn":"js/addBtn.ts"}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -12606,7 +12609,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51997" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50280" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

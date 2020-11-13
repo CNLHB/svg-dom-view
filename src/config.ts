@@ -2,11 +2,11 @@ let fixedProps: string[] = ["id", "class", "style", "transform", "stroke", "stro
 export let singleTag: string [] = ["path", "line", "rect", "circle", "ellipse", "polyline", "polygon",]
 export let doubleTag: string [] = ["svg", "text", "g"]
 
-interface IPropsStrate {
+interface IPropsState {
     [key: string]: string[]
 }
 
-let propsStrate: IPropsStrate = {
+let propsState: IPropsState = {
     svg: ["x", "y", "width", "height", "viewBox"],
     text: ["x", "y", "width", "height", "font-family", "font-size"],
     path: ["d"],
@@ -39,7 +39,7 @@ export const toCheckProps: string[] = [
 ]
 
 export function getProps(tag: SVG_TAG): string[] {
-    return fixedProps.concat(propsStrate[tag])
+    return fixedProps.concat(propsState[tag])
 }
 
 export function debounce(fn: new () => void, time: number) {
@@ -53,7 +53,7 @@ export function debounce(fn: new () => void, time: number) {
     }
 }
 
-export function checkInter(str: string, val: string): boolean {
+export function isCheckNumber(str: string, val: string): boolean {
     if (toCheckProps.indexOf(str) !== -1) {
         let reg = /[A-Za-z_.]/g
         return !reg.test(val)

@@ -1,20 +1,26 @@
 //匹配标签
 import $ from "jquery";
-import {createElementByVdom, deepKeyValue, IVDomNode, svgType} from "../utils/utils";
+import {createElementByVdom, deepKeyValue} from "../utils/utils";
 import validateXML from "../utils/checkXML";
 import SvgUtils from "../utils/createSVG";
 import {singleTip} from "./singleTip";
 import {svgInfo} from "../index";
-import {doubleTag, singleTag, SVG_TAG} from "../config";
+import {doubleTag, singleTag} from "../config";
+import {attrArea} from '../index'
 
 let checkSvgTag: RegExp = /(?<=<)[a-z]+(?=[>| ])/g;
 //匹配标签
 let matchSvg: RegExp = /<[a-z]+([\s\S]*?) *?>|<!--([\s\S]*?)-->/g;
-//匹配svg
-let matchSvgTag: RegExp = /<svg([\s\S]*?)<\/svg>/g
-let matchTag: RegExp = /<(\S*?)[^>]*>.*?|<.*? \/>/g;
-let matchUpper: RegExp = /[A-Z]/
+let matchUpper: RegExp = /[A-Z]/g
 
+//匹配Tag
+let matchTag: RegExp = /<(\S*?)[^>]*>.*?|<.*? \/>/g;
+//匹配TagName
+let regTag: RegExp = /(?<=<)[a-z]+(?= +)|[a-z]+(?=>)/g
+
+/**
+ * 编辑区域
+ */
 class EditArea {
     public editText: string = "";
     public editHtml: string = "";
@@ -38,14 +44,8 @@ class EditArea {
         this.editText = this.editText.replace(/\n/gm, " ")
         this.editText = this.editText.replace(/\s+/g, " ").replace(/(?<=>) *(?=<)/g, `
         `)
-        let svgArr = this.editText.match(matchSvgTag) == null ? [] : this.editText.match(matchSvgTag)
-        let svgArrTag = this.editText.match(matchSvg) == null ? [] : this.editText.match(matchSvg)
-        let tagNameArr = this.editText.match(checkSvgTag)
-        let tagArr = this.editText.match(matchTag)
-        let svgTagArr: string[] = []
         let ret: RegExpExecArray | null = matchTag.exec(this.editText)
         if (ret == null) return singleTip("请输入正确的svg字符串", "error")
-        let regTag: RegExp = /(?<=<)[a-z]+(?= +)|[a-z]+(?=>)/g
         let matchTagAll: string [] = []
         let inputSingleTag: Set<string> = new Set<string>()
         let inputDobuleTag: Set<string> = new Set<string>()
@@ -66,47 +66,13 @@ class EditArea {
             }
             ret = matchTag.exec(this.editText)
         }
-        if (illegalTag.size > 0) {
-            singleTip(`${Array.from(illegalTag).join(", ")} is not an svg tag`, "wraning")
-        }
-
-        let startTagArr = []
-        let endTagArr = []
-        let reg: RegExp = /(?<=<)[a-z]+(?= +)/g
-        console.log(matchTagAll)
-        console.log(this.editText)
         if (matchTagAll[0] !== "svg") return singleTip("root标签必须是svg", "error")
-        // let len: number = matchTagAll.length
-        // for (let i = 0; i < len; i++) {
-        //     let value = matchTagAll[i]
-        //     if (value.startsWith("/")) {
-        //         endTagArr.push(value)
-        //     } else {
-        //         startTagArr.push(value)
-        //     }
-        // }
-        // let startLen = startTagArr.length
-        // let copyArr = startTagArr.slice()
-        // for (let i = 0; i < startLen; i++) {
-        //     if (inputSingleTag.has(startTagArr[i])) {
-        //         copyArr.shift()
-        //         continue
-        //     }
-        //     if (inputDobuleTag.has(startTagArr[i]) && ("/" + copyArr.shift() == endTagArr.pop())) {
-        //
-        //     } else {
-        //         return singleTip(startTagArr[i] + " is not closing properly", "error")
-        //     }
-        // }
-
         let showDom: JQuery = $("#dom-show")
-
         let checkXML = validateXML(this.editText)
         let errorFlag: boolean = false
         if (checkXML.error_code == 1) {
             if (checkXML.msg.indexOf("mismatch") > -1) {
                 errorFlag = true
-                //error on line 3 at column 10: Opening and ending tag mismatch: svg1 line 0 and svg
                 console.log("标签不匹配")
                 console.log(checkXML.msg, "error")
                 singleTip(checkXML.msg)
@@ -134,7 +100,11 @@ class EditArea {
 
         } else {
             console.log(validateXML(this.editText).msg)
-            singleTip(checkXML.msg, "success")
+            if (illegalTag.size > 0) {
+                singleTip(`${Array.from(illegalTag).join(", ")} is not an svg tag`, "warning")
+            } else {
+                singleTip(checkXML.msg, "success")
+            }
         }
         // @ts-ignore
         let fragment: DocumentFragment = document.createDocumentFragment();
@@ -142,16 +112,16 @@ class EditArea {
             svgInfo.svg.html()
             showDom.html()
             $("#graph-svg").html()
-            console.log(888)
             return
         }
         fragment.appendChild($(this.editText)[0])
-        let nodes: any = null
+        let nodes: any;
         nodes = fragment.firstElementChild
-        nodes.setAttribute("height", String(svgInfo.width))
-        nodes.setAttribute("width", String(svgInfo.height))
+
         let vDom = deepKeyValue(nodes)
         svgInfo.svg.html(fragment)
+        let rect = nodes.getBoundingClientRect()
+        console.log()
         let rectTips = SvgUtils.createSVG(
             'rect',
             {
@@ -160,8 +130,19 @@ class EditArea {
                 id: 'rect-tip',
                 'stroke-width': 2, fill: '#89cff0'
             });
+        let svgTips = SvgUtils.createSVG(
+            'rect',
+            {
+                x: 0, y: 0, width: rect.width, height: rect.height, stroke: 'greenyellow',
+                opacity: "0.5",
+                id: 'svg-tip',
+                'stroke-width': 2, fill: 'transparent'
+            });
+        $("#graph-svg").append(svgTips)
         $("#graph-svg").append(rectTips)
         showDom.html(createElementByVdom(vDom))
+        $(".add-container").css("display", 'none')
+        attrArea.getAttrArea().html(null)
 
     }
 

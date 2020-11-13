@@ -1,13 +1,20 @@
 import $ from "jquery";
 import ClickEvent = JQuery.ClickEvent;
-import {checkInter} from "../config";
+import {isCheckNumber} from "../config";
 import {singleTip} from "./singleTip";
-
 /**
  * 属性区域
  */
 class AttrArea {
+    /**
+     * 缓存输入框的值
+     * @private cacheText
+     */
     private cacheText: string = ''
+    /**
+     * 缓存输入框的props id
+     * @private cacheId
+     */
     private cacheId: string = ''
 
     constructor(public attrArea: any) {
@@ -15,33 +22,51 @@ class AttrArea {
         this.bindDeleteBtnClick()
         this.bindInputChange()
     }
-
+    getAttrArea(): any {
+        return this.attrArea
+    }
+    /**
+     * 删除属性按钮绑定删除事件
+     */
     bindDeleteBtnClick() {
         this.attrArea.on('click', '.delete-btn', this.deleteBtnClickHandler)
     }
-
+    /**
+     * 在input输入框中绑定修改事件
+     */
     bindInputChange() {
         this.attrArea.on('input', 'input', this.inputChangeHandler)
     }
 
+    /**
+     * 输入框改变事件处理函数
+     * @param event
+     */
     inputChangeHandler = (event: ClickEvent) => {
         let target: JQuery = $(event.target)
         let id: string | undefined = target.attr('id')
         let propsValue: string = (target.val() as string).trim()
-
+        /**
+         * 没有选择dom Tree 区域标签， 直接返回
+         */
         if (id != null) {
             let uid = id.split('_')
             if (propsValue.length==0){
                 this.cacheText = ''
                 return
             }
-            console.log()
-            if (uid[1] && !checkInter(uid[1], propsValue)) {
+            /**
+             * 数值检验不合法， 直接返回
+             */
+            if (uid[1] && !isCheckNumber(uid[1], propsValue)) {
                 singleTip("请输入有效的数值", "error")
                 target.val(this.cacheId === id  ? this.cacheText : "")
                 this.cacheId = id
                 return
             }
+            /**
+             * node节点
+             */
             if (uid[1] == "content") {
                 $("#dom-" + uid[0]).children(".text-node").text(propsValue)
                 $("#" + uid[0]).html(propsValue)
@@ -50,7 +75,6 @@ class AttrArea {
             }
 
             let domGraph: JQuery = $("#" + uid[0])
-            // console.log(domGraph)
             if (target.val()) {
                 domGraph.attr(uid[1], propsValue)
             } else {

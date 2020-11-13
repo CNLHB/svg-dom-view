@@ -3,9 +3,14 @@ import $ from "jquery";
 import {singleTip} from "./singleTip";
 import {doubleTag} from "../utils/utils";
 import {domTree} from '../index'
+
+/**
+ * 创建dom Tree menu
+ */
 class SelMenu {
-    private copyNode: any;
-    constructor(public menu: any) {
+    private copyNode: JQuery<HTMLElement> | null = null;
+
+    constructor(public menu: JQuery) {
         this.menu = menu;
         this.bindMenuClick()
     }
@@ -18,23 +23,36 @@ class SelMenu {
         event.stopPropagation();
         let target = $(event.currentTarget);
         let type = target.attr("data-type")
-        let oMenu = $("#menu")
-        let cloneSvg: any;
-        let selectSvg: any;
+        let oMenu: JQuery = $("#menu")
+        let cloneSvg: JQuery = $();
+        let selectSvg: JQuery = $();
         if (type !== "paste-node" && type?.startsWith("paste")) {
             let copyUId = domTree.getSelectDom().attr("data-uid")
             let id = copyUId + Math.ceil(Math.random() * 1000)
             selectSvg = $("#" + copyUId)
-            cloneSvg = selectSvg.clone(true);
-            cloneSvg.attr("id", id)
-            this.copyNode.attr("data-uid", id)
-            this.copyNode.attr("id", "dom-" + id)
-            this.copyNode.removeClass("select-dom")
+            if (selectSvg.get(0).tagName == 'text') {
+                selectSvg.html(selectSvg.html() + `
+                ${selectSvg.html()}
+                `)
+            } else {
+                cloneSvg = selectSvg.clone(true);
+                cloneSvg.attr("id", id)
+            }
+            if (this.copyNode!=null){
+                this.copyNode.attr("data-uid", id)
+                this.copyNode.attr("id", "dom-" + id)
+                this.copyNode.removeClass("select-dom")
+            }
+
         }
 
         switch (type) {
             case "remove-node":
                 domTree.getSelectDom().remove()
+                $("#" + domTree.getSelectDom().attr("data-uid")).remove()
+                $("#svg-tip").remove()
+                $("#rect-tip").remove()
+
                 oMenu.css({
                     display: "none"
                 })
@@ -48,7 +66,7 @@ class SelMenu {
                 if (uid) {
                     let tag = uid.split("-")[0]
                     if (tag == "svg" || domTree.getSelectDom()[0].tagName == "g") {
-                        singleTip("所选内容不是节点","error")
+                        singleTip("所选内容不是节点", "error")
                         return this.copyNode = null
                     }
                 }
@@ -56,7 +74,7 @@ class SelMenu {
                 singleTip("复制节点成功")
                 break;
             case "paste-node":
-                if (!this.copyNode)return singleTip("没有复制内容","error")
+                if (!this.copyNode) return singleTip("没有复制内容", "error")
                 $("#child-menu").css("display", "block");
 
                 break;

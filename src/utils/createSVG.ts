@@ -3,7 +3,6 @@ export default class SvgUtils{
     constructor(){
 
     }
-
     static createSVG = (tag: string, attrs: any): SVGElement => {
         let el = document.createElementNS('http://www.w3.org/2000/svg', tag);
         for (let k in attrs)
