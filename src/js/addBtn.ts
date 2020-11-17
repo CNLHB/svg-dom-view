@@ -57,7 +57,14 @@ class AddBtn {
             nameProps.children(".name-" + props).next().text(propsValue)
         }
         let inputId: string = uid + "_" + props
-        let attrHtml: string = createPropsAndValue(props, propsValue, uid, inputId)
+        let attrHtml: string = `
+        <div class="aiwa-input aiwa-input-group aiwa-input-group--prepend">
+            <div class="aiwa-input-group__prepend">${props}</div>
+            <input type="text" ${props == "id" ? "disabled" : ""} value='${propsValue}' data-uid=${uid} id=${inputId} autocomplete="off"
+             placeholder="未指定" class="aiwa-input__inner">
+             <button type="button" class="delete-btn delete-attr"><span>删除</span></button>
+        </div>
+    `
 
         $("#attr-wrap").append(attrHtml)
 
