@@ -117,7 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/node_modules/process/browser.js":[function(require,module,exports) {
+})({"C:/Users/Administrator/AppData/Roaming/npm/node_modules/parcel/node_modules/process/browser.js":[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {}; // cached from whatever global is present so that test runners that stub it
@@ -11203,7 +11203,7 @@ if ( typeof noGlobal === "undefined" ) {
 return jQuery;
 } );
 
-},{"process":"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/node_modules/process/browser.js"}],"src/js/svgInfo.ts":[function(require,module,exports) {
+},{"process":"C:/Users/Administrator/AppData/Roaming/npm/node_modules/parcel/node_modules/process/browser.js"}],"src/js/svgInfo.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -12613,7 +12613,7 @@ var selMenu = new selMenu_1.default(domView);
 var editArea = new editArea_1.default(jquery_1.default('#edit'));
 exports.attrArea = new attrArea_1.default(jquery_1.default("#attr-wrap"));
 var addBtn = new addBtn_1.default(jquery_1.default("#add-btn"));
-},{"jquery":"node_modules/jquery/dist/jquery.js","./js/svgInfo":"src/js/svgInfo.ts","./js/editArea":"src/js/editArea.ts","./js/domTree":"src/js/domTree.ts","./js/selMenu":"src/js/selMenu.ts","./js/attrArea":"src/js/attrArea.ts","./js/addBtn":"src/js/addBtn.ts"}],"C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"jquery":"node_modules/jquery/dist/jquery.js","./js/svgInfo":"src/js/svgInfo.ts","./js/editArea":"src/js/editArea.ts","./js/domTree":"src/js/domTree.ts","./js/selMenu":"src/js/selMenu.ts","./js/attrArea":"src/js/attrArea.ts","./js/addBtn":"src/js/addBtn.ts"}],"C:/Users/Administrator/AppData/Roaming/npm/node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -12641,7 +12641,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51549" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62663" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -12817,5 +12817,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["C:/Users/TR/AppData/Roaming/nvm/v12.13.1/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","src/index.ts"], null)
+},{}]},{},["C:/Users/Administrator/AppData/Roaming/npm/node_modules/parcel/src/builtins/hmr-runtime.js","src/index.ts"], null)
 //# sourceMappingURL=/src.f10117fe.js.map

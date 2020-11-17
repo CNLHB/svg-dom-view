@@ -1,15 +1,15 @@
-let fixedProps: string[] = ["id", "class", "style", "transform", "stroke", "stroke-width", "fill"]
-export let singleTag: string [] = ["path", "line", "rect", "circle", "ellipse", "polyline", "polygon"]
-export let doubleTag: string [] = ["svg", "text", "g"]
-let checkSvgTag: RegExp = /(?<=<)[a-z]+(?=[>| ])/g;
+const fixedProps: string[] = ["id", "class", "style", "transform", "stroke", "stroke-width", "fill"]
+export const singleTag: string [] = ["path", "line", "rect", "circle", "ellipse", "polyline", "polygon"]
+export const doubleTag: string [] = ["svg", "text", "g"]
+const checkSvgTag: RegExp = /(?<=<)[a-z]+(?=[>| ])/g;
 //匹配标签
-let matchSvg: RegExp = /<[a-z]+([\s\S]*?) *?>|<!--([\s\S]*?)-->/g;
-let matchUpper: RegExp = /[A-Z]/g
+const matchSvg: RegExp = /<[a-z]+([\s\S]*?) *?>|<!--([\s\S]*?)-->/g;
+const matchUpper: RegExp = /[A-Z]/g
 interface IPropsState {
     [key: string]: string[]
 }
 
-let propsState: IPropsState = {
+const propsState: IPropsState = {
     svg: ["x", "y", "width", "height", "viewBox"],
     text: ["x", "y", "width", "height", "font-family", "font-size"],
     path: ["d"],
