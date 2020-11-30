@@ -4,5 +4,7 @@
 #### 初始状态：
 
 !(初始状态)[http://image.xquery.cn/init.png]
+
 #### 展示状态： 
-!(展示状态)[http://image.xquery.cn/dom-show.png]
+
+![展示状态](http://image.xquery.cn/dom-show.png)
